@@ -1,6 +1,8 @@
 # coihuin-compress
 
-Proactive context compression for long Claude Code sessions.
+A **Claude Code skill** for proactive context compression in long coding sessions.
+
+> **This is a skill, not a standalone tool.** Copy `.claude/skills/coihuin-compress/` to your project and it just works.
 
 ## The Problem
 
@@ -48,17 +50,13 @@ Done:
 
 ## Installation
 
-This is a Claude Code skill. Copy the skill directory to your project:
+Copy the skill directory to your project:
 
 ```bash
 cp -r .claude/skills/coihuin-compress /path/to/your/project/.claude/skills/
 ```
 
-Or for global use:
-
-```bash
-cp -r .claude/skills/coihuin-compress ~/.claude/skills/
-```
+That's it. Claude Code will discover and use the skill automatically.
 
 ## Usage
 
@@ -106,7 +104,7 @@ checkpoints/
 
 ## Background
 
-This skill formalizes a workflow I'd been using informally. Two sources shaped the design:
+This Claude Code skill formalizes a workflow I'd been using informally. Two sources shaped the design:
 
 1. **[ReSum](https://arxiv.org/pdf/2509.13313)** (Alibaba NLP) — Context summarization for long-horizon search intelligence
 2. **[Factory.ai](https://factory.ai/news/compressing-context)** — "What Must Survive" categories, proactive vs reactive compression
