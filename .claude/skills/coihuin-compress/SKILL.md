@@ -7,6 +7,8 @@ description: Proactive context compression for long coding sessions. Creates che
 
 Proactive context compression at natural breakpoints, not reactive to token limits.
 
+> **What "proactive" means**: The proactiveness is *human* proactiveness—the user consciously recognizes milestones and chooses to preserve state before context fills. This contrasts with *reactive* compression where the system forces summarization when limits are hit (damage control). Here, compression is intentional state management triggered at natural breakpoints.
+
 ## Workflow
 
 ```
