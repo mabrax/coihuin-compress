@@ -1,4 +1,4 @@
-# coihuin-compress
+# Coihuin Compress
 
 A **Claude Code skill** for proactive context compression in long coding sessions.
 
