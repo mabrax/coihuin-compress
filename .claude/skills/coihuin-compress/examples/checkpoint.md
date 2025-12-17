@@ -28,6 +28,14 @@ Implement JWT-based auth with login/logout, protected routes, and session persis
 - bcrypt for password hashing
 - jose for JWT handling
 
+### Breadcrumbs
+
+| Type | Reference | Hint |
+|------|-----------|------|
+| file | `src/app/api/auth/login/route.ts` | JWT login endpoint with error handling |
+| function | `hashPassword()` | Bcrypt password hashing with 12 rounds |
+| decision | Phase 1, JWT over sessions | Why JWT tokens over traditional session storage |
+
 ### Play-By-Play
 
 - Phase 1 → Set up Prisma User model → Complete

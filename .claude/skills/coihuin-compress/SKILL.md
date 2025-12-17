@@ -115,5 +115,5 @@ checkpoints/
 ## Priority Hierarchy (token pressure)
 
 1. **Must Keep**: Problem, session intent, decisions, current state, next actions
-2. **Should Keep**: Recent artifact trail, recent play-by-play, technical context
+2. **Should Keep**: Recent artifact trail, recent play-by-play, technical context, breadcrumbs
 3. **Can Summarize**: Older play-by-play, completed artifacts, historical decisions

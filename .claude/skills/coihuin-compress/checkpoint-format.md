@@ -1,6 +1,6 @@
 # Checkpoint Format Specification
 
-Version: 1.0.0
+Version: 1.1.0
 
 ## Overview
 
@@ -35,6 +35,16 @@ anchor: <reference to conversation point or phase>
 
 ### Technical Context
 [Stack, configuration, environment - facts that inform implementation]
+
+### Breadcrumbs
+[Minimal references for context reconstruction]
+
+| Type | Reference | Hint |
+|------|-----------|------|
+| file | `path/to/file` | What this contains/does |
+| function | `module.functionName()` | What this function does |
+| decision | Phase N, topic | Why this decision was made |
+| external | URL or identifier | What this resource provides |
 
 ### Play-By-Play
 [High-level sequence of major actions completed]
@@ -79,6 +89,7 @@ anchor: <reference to conversation point or phase>
 | Artifact Trail | Yes | Files touched | Prune completed/irrelevant; keep active |
 | Current State | Yes | What exists now | Replace entirely each checkpoint |
 | Next Actions | Yes | Pending work | Replace entirely each checkpoint |
+| Breadcrumbs | No | Minimal references for context reconstruction | Prune stale entries opportunistically during merge |
 | User Rules | No | Constraints | Copy forward unless changed |
 
 ## Information Priority Hierarchy
@@ -96,6 +107,7 @@ When under token pressure, preserve in this order:
    - Artifact trail (recent files)
    - Play-by-play (recent actions)
    - Technical context
+   - Breadcrumbs (compress stale entries as needed)
 
 3. **Can Summarize** (aggressive compression allowed)
    - Older play-by-play entries
@@ -140,6 +152,14 @@ Create "Chromatic Quest" - web game where Gemini API generates images converted 
 - Vite 7.x, Tailwind CSS 4.x
 - HTML5 Canvas API
 - @google/genai SDK
+
+### Breadcrumbs
+
+| Type | Reference | Hint |
+|------|-----------|------|
+| file | `src/services/gemini.ts` | Gemini API client with exponential backoff retry logic |
+| function | `imageProcessor.convertToRegions()` | Converts quantized image to paintable regions |
+| decision | Phase 2, exponential backoff | Why exponential over linear backoff for API retries |
 
 ### Play-By-Play
 - Phase 1 → Implemented core canvas + color quantization → Complete
