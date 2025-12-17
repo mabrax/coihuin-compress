@@ -4,16 +4,19 @@ title: "Add breadcrumbs system for context reconstruction"
 nature: feature
 impact: additive
 version: minor
-status: ready
+status: done
 created: 2025-12-14
 updated: 2025-12-17
 
 context:
   required:
-    - specs/checkpoint-format.md
-    - specs/delta-format.md
+    - type: spec
+      path: specs/checkpoint-format.md
+    - type: spec
+      path: specs/delta-format.md
   recommended:
-    - docs/examples/chk-*.md
+    - type: doc
+      path: docs/examples/chk-*.md
 
 depends_on:
   - ISSUE-001
@@ -47,7 +50,7 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 - [x] Specify how breadcrumbs integrate with checkpoint format
 - [x] Specify breadcrumb lifecycle (when created, when pruned)
 - [x] Define reconstruction protocol (how agent uses breadcrumbs to fetch context)
-- [ ] Add breadcrumbs section to checkpoint format spec
+- [x] Add breadcrumbs section to checkpoint format spec
 
 ### Out of Scope
 
@@ -58,10 +61,10 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 ## Acceptance Criteria
 
 - [x] Breadcrumb format specification documented (spec-002)
-- [ ] Integration with checkpoint-format.md complete
+- [x] Integration with checkpoint-format.md complete
 - [x] At least 3 breadcrumb categories defined with examples (file, function, decision, external)
 - [x] Reconstruction protocol documented
-- [ ] Example checkpoint with breadcrumbs section created
+- [x] Example checkpoint with breadcrumbs section created
 
 ## Proposed Structure
 
