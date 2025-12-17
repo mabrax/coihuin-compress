@@ -156,11 +156,13 @@ coihuin-compress/
 │   ├── PROJECT.yaml          # Project definition
 │   ├── CONSTITUTION.md       # Rules and philosophy
 │   └── issues/               # Issue tracking
-├── docs/
-│   └── examples/             # Example checkpoints and deltas
 ├── .claude/
-│   └── commands/cspec/       # cspec slash commands
-└── [skill files]             # Skill definition (to be created)
+│   ├── commands/cspec/       # cspec slash commands
+│   └── skills/coihuin-compress/  # Skill definition
+│       ├── SKILL.md              # Main skill file
+│       ├── checkpoint-format.md  # Format specification
+│       └── examples/             # Reference examples
+└── checkpoints/active/       # Active checkpoints
 ```
 
 **Key Components**:
@@ -183,7 +185,7 @@ coihuin-compress/
 | `specs/PROJECT.yaml` | Project definition and scope |
 | `specs/CONSTITUTION.md` | Development rules and philosophy |
 | `AGENTS.md` | Agent context (this file) |
-| `docs/examples/` | Example checkpoint and delta formats |
+| `.claude/skills/coihuin-compress/` | Skill definition and examples |
 
 ### Testing
 

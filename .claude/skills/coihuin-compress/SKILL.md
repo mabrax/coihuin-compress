@@ -90,7 +90,8 @@ checkpoints/
 | File | Purpose |
 |------|---------|
 | `checkpoint-format.md` | Checkpoint structure specification |
-| `examples/checkpoint.md` | Reference checkpoint example |
+| `examples/checkpoint-example.md` | Reference example for first-time checkpoint creation |
+| `examples/checkpoint.md` | Additional checkpoint example |
 | `validate.py` | Format validation script |
 
 ## Priority Hierarchy (token pressure)

@@ -2,7 +2,7 @@
 checkpoint: chk-issue-backlog
 created: 2025-12-17T15:21:36Z
 anchor: post-dialectic-cleanup
-last_delta: 2025-12-17T18:40:14Z
+last_delta: 2025-12-17T20:29:37Z
 ---
 
 ## Problem
@@ -39,52 +39,56 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - Dialectic audit → Generated ISSUE-004 through ISSUE-012 → Complete
 - Post-audit → ISSUE-004, ISSUE-009 closed during discussions → Complete
 - 2025-12-17 → ISSUE-005 invalidated, ADR-001 created, DEPENDENCIES.md updated → Complete
-- 2025-12-17 → ISSUE-011 spec created and reviewed (spec-011.md) → Complete
-- 2025-12-17 → ISSUE-011 implemented via 4-phase plan with senior implementers → Complete
-- 2025-12-17 → ISSUE-006 reframed based on real-world usage feedback → Complete
-- 2025-12-17 → spec-006.md created, validated against issue → Complete
-- 2025-12-17 → TASKS-006.md created, validated against spec, fixes applied → Complete
+- 2025-12-17 → ISSUE-011 spec created, reviewed, implemented via 4-phase plan → Complete
+- 2025-12-17 → ISSUE-006 reframed, spec + tasks created → Complete
+- 2025-12-17 → ISSUE-006 implemented via 4 phases (senior-implementer agents) → Complete
+- 2025-12-17 → ISSUE-012 discussed, spec + tasks created, agent-reviewed → Ready
 
 ### Artifact Trail
 
 | File | Status | Key Change |
 |------|--------|------------|
-| `specs/issues/active/ISSUE-006.md` | modified | Reframed: "Simplify to delta-as-operation model", status=ready |
-| `specs/issues/active/spec-006.md` | created | Full specification for delta-as-operation model |
-| `specs/issues/active/TASKS-006.md` | created | 4-phase implementation plan with validation hooks |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | New delta definition, removed merge section |
+| `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Added `last_delta` frontmatter field |
+| `.claude/skills/coihuin-compress/delta-format.md` | deleted | Delta artifact spec no longer needed |
+| `specs/delta-format.md` | deleted | Duplicate delta spec removed |
+| `docs/examples/delta-*.md` | deleted | 4 stale delta example files removed |
+| `specs/issues/done/ISSUE-006.md` | moved | Implementation complete |
+| `specs/issues/done/spec-006.md` | moved | Preserved with issue |
+| `specs/issues/active/ISSUE-012.md` | modified | Refined scope, removed obsolete items |
+| `specs/issues/active/spec-012.md` | created | Format cleanup specification |
+| `specs/issues/active/TASKS-012.md` | created | 4-phase implementation plan |
 
 ### Breadcrumbs
 
 | Type | Reference | Hint |
 |------|-----------|------|
-| file | `specs/issues/active/spec-006.md` | Delta-as-operation specification |
-| file | `specs/issues/active/TASKS-006.md` | Implementation plan for ISSUE-006 |
 | file | `eval/rubric.md` | Canonical scoring rubric |
 | file | `.claude/commands/eval-checkpoint.md` | Full dialectic eval command |
-| file | `.claude/skills/coihuin-compress/SKILL.md:121-172` | Checkpoint Evaluation section |
+| file | `.claude/skills/coihuin-compress/SKILL.md:45-68` | New Delta operation section |
+| commit | `ee727b7` | ISSUE-006 implementation commit |
+| file | `specs/issues/done/spec-012.md` | Format cleanup spec with validation table |
+| file | `specs/issues/done/TASKS-012.md` | 4-phase implementation plan |
+| file | `.claude/skills/coihuin-compress/examples/checkpoint-example.md` | Reference example for first checkpoint |
 
 ### Current State
 
-**4 active issues remaining:**
+**3 active issues remaining:**
 
 | Issue | Title | Status |
 |-------|-------|--------|
-| ISSUE-006 | Simplify to delta-as-operation model | Ready (spec + tasks complete) |
 | ISSUE-007 | Validation layers | Draft |
 | ISSUE-008 | Cognitive load / warnings | Draft |
 | ISSUE-010 | Archive lifecycle | Draft |
-| ISSUE-012 | Clean up format spec | Draft |
 
-**Done issues:** ISSUE-001, 002, 003, 004, 009, 011
+**Done issues:** ISSUE-001, 002, 003, 004, 006, 009, 011, 012
 **Invalid issues:** ISSUE-005 (see ADR-001)
 
 ### Next Actions
 
-1. **Implement ISSUE-006** - Execute TASKS-006.md (4 phases: delete delta files, update SKILL.md, update checkpoint-format.md, validate)
-2. **Implement ISSUE-012** (Format spec cleanup)—quick win, low risk
-3. **Implement ISSUE-007** (Validation rename + LLM semantic checks)
-4. **Implement ISSUE-008** (Warning guidance in SKILL.md)
-5. **Implement ISSUE-010** (Add .claudeignore to archive/)
+1. **Spec ISSUE-007** (Validation layers)—needs spec + tasks before implementation
+2. **Spec ISSUE-008** (Cognitive load / warnings)
+3. **Spec ISSUE-010** (Archive lifecycle)
 
 ## User Rules
 
@@ -94,34 +98,175 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 
 ---
 
-## Delta: 2025-12-17T18:40:14Z
+## Delta: 2025-12-17T19:02:30Z
 
 ### What Changed
 
-**ISSUE-006 fully specified and ready for implementation** based on user's real-world feedback from using the skill.
+**ISSUE-006 implemented** - Simplified coihuin-compress from three concepts to two operations.
 
-### Key Insight
+### Implementation
 
-User reported: "I always say do not write the delta and only add it." This revealed that the three-concept model (checkpoint, delta artifact, merge) was overcomplicated. The new model has two operations:
-- `checkpoint` = create fresh snapshot
-- `delta` = update existing checkpoint with what changed
+Executed TASKS-006.md via 4 parallel senior-implementer agents:
+- **Phase 1**: Deleted delta-format.md specs (2 files)
+- **Phase 2**: Updated SKILL.md (new delta definition, removed merge section)
+- **Phase 3**: Updated checkpoint-format.md (added `last_delta` field)
+- **Phase 4**: Validated and moved ISSUE-006 to done/
+
+Post-review fixes:
+- Deleted 4 stale delta examples from `docs/examples/`
+- Restored spec-006.md to `specs/issues/done/` per AGENTS.md guidelines
 
 ### Artifacts
 
 | File | Action | Description |
 |------|--------|-------------|
-| `specs/issues/active/ISSUE-006.md` | modified | Reframed title and scope to delta-as-operation model |
-| `specs/issues/active/spec-006.md` | created | Full spec with design decisions, removals, SKILL.md changes, implementation steps |
-| `specs/issues/active/TASKS-006.md` | created | 4-phase plan: delete files, update SKILL.md, update checkpoint-format, validate |
-
-### Validations Performed
-
-1. **spec vs issue**: 5/5 scope items PASS, 5/5 acceptance criteria PASS
-2. **tasks vs spec**: 100% coverage, correct order, all files listed, 3 minor fixes applied
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Delta = "update checkpoint", merge section removed |
+| `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Added optional `last_delta` frontmatter field |
+| `.claude/skills/coihuin-compress/delta-format.md` | deleted | Artifact spec eliminated |
+| `specs/delta-format.md` | deleted | Duplicate removed |
+| `docs/examples/delta-001-002.md` | deleted | Stale example |
+| `docs/examples/delta-002-003.md` | deleted | Stale example |
+| `docs/examples/delta-003-004.md` | deleted | Stale example |
+| `docs/examples/delta-004-005.md` | deleted | Stale example |
+| `specs/issues/done/ISSUE-006.md` | moved | From active/, all criteria checked |
+| `specs/issues/done/spec-006.md` | created | Restored for historical record |
 
 ### Status Transitions
 
 | Item | Before | After |
 |------|--------|-------|
-| ISSUE-006 | Draft | Ready (spec + tasks complete) |
-| Active issues | 5 | 4 (ISSUE-006 ready to implement) |
+| ISSUE-006 | Ready | Done |
+| Active issues | 4 (with 006 ready) | 4 (all draft) |
+| Done issues | 6 | 7 |
+
+---
+
+## Delta: 2025-12-17T19:47:09Z
+
+### What Changed
+
+**ISSUE-012 spec'd and ready** - Created specification and implementation tasks for format spec cleanup.
+
+### Session Work
+
+1. Discussed ISSUE-012 scope refinement:
+   - Removed obsolete delta-format.md review (deleted in ISSUE-006)
+   - Added docs/examples/ deletion (historical design artifacts)
+   - Clarified examples were iterative design checkpoints, not reference docs
+
+2. Created spec-012.md:
+   - Design principles for lean specs
+   - Content analysis with line numbers
+   - 4 implementation steps
+   - 7 validation checks
+
+3. Agent review of issue-spec coherence (3 parallel Explore agents):
+   - Scope coverage: PASS
+   - Acceptance criteria: PASS
+   - Internal consistency: PASS (line numbers verified)
+
+4. Created TASKS-012.md:
+   - Phase 1: Clean checkpoint-format.md
+   - Phase 2: Delete historical examples
+   - Phase 3: Document removal in history
+   - Phase 4: Validate and finalize
+
+5. Agent review of tasks (3 parallel Explore agents):
+   - Tasks-spec alignment: 100% coverage
+   - Tasks-issue alignment: 95% (all criteria mapped)
+   - Executability: PASS (minor recommendations only)
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `specs/issues/active/ISSUE-012.md` | modified | Refined scope, updated date |
+| `specs/issues/active/spec-012.md` | created | Format cleanup specification |
+| `specs/issues/active/TASKS-012.md` | created | 4-phase implementation plan |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-012 | Draft | Ready |
+| Active issues (ready) | 0 | 1 |
+
+---
+
+## Delta: 2025-12-17T20:22:08Z
+
+### What Changed
+
+**ISSUE-012 implemented and review findings fixed** - Cleaned up format spec, extracted example to separate file, fixed stale references.
+
+### Session Work
+
+1. **Revised Phase 1 of TASKS-012.md**:
+   - Changed from "delete Example section" to "move Example to separate file"
+   - Validated approach against claude-code-guide (examples in separate files recommended)
+   - Added task 1.4: Update SKILL.md to reference example
+
+2. **Executed TASKS-012.md** via senior-implementer agent:
+   - Phase 1: Extracted example to `.claude/skills/coihuin-compress/examples/checkpoint-example.md`
+   - Phase 2: Deleted `docs/examples/` (6 historical artifacts)
+   - Phase 3: Created `history/2025-12-17-cleanup-notes.md`
+   - Phase 4: Validated, moved issue to `done/`
+
+3. **Fixed review findings** (from review-issue-012.md):
+   - Updated AGENTS.md Architecture section (removed `docs/examples/` reference)
+   - Updated AGENTS.md Important Files table
+   - Deleted duplicate `specs/checkpoint-format.md`
+   - Updated checkpoint status and breadcrumbs
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `specs/issues/active/TASKS-012.md` | modified | Revised Phase 1 to move example instead of delete |
+| `.claude/skills/coihuin-compress/examples/checkpoint-example.md` | created | Extracted example for first checkpoint reference |
+| `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Removed Example and References sections |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Added reference to examples/ |
+| `docs/examples/` | deleted | 6 historical checkpoint files removed |
+| `history/2025-12-17-cleanup-notes.md` | created | Documents removal decision |
+| `AGENTS.md` | modified | Updated Architecture and Important Files |
+| `specs/checkpoint-format.md` | deleted | Duplicate of skill version |
+| `specs/issues/done/ISSUE-012.md` | moved | From active/, all criteria checked |
+| `specs/issues/done/spec-012.md` | moved | From active/ |
+| `specs/issues/done/TASKS-012.md` | moved | From active/ |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-012 | Ready | Done |
+| Active issues | 4 | 3 |
+| Done issues | 7 | 8 |
+
+---
+
+## Delta: 2025-12-17T20:29:37Z
+
+### What Changed
+
+**Global skill synced** - Updated `/Users/mabrax/.claude/skills/coihuin-compress/` to match local repo.
+
+### Session Work
+
+1. Identified global skill was stale (missing ISSUE-006 and ISSUE-012 changes)
+2. Synced files from local repo to global skill installation
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `~/.claude/skills/coihuin-compress/SKILL.md` | updated | Delta-as-operation model |
+| `~/.claude/skills/coihuin-compress/checkpoint-format.md` | updated | Removed Example/References sections |
+| `~/.claude/skills/coihuin-compress/examples/checkpoint-example.md` | created | New reference example |
+| `~/.claude/skills/coihuin-compress/examples/checkpoint.md` | updated | Added Breadcrumbs section |
+| `~/.claude/skills/coihuin-compress/delta-format.md` | deleted | Per ISSUE-006 simplification |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Global skill | Stale (pre-ISSUE-006) | Synced with local repo |
