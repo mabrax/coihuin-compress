@@ -4,9 +4,9 @@ title: "Design and implement coihuin-compress Claude Code skill"
 nature: feature
 impact: additive
 version: minor
-status: ready
+status: done
 created: 2025-12-14
-updated: 2025-12-14
+updated: 2025-12-17
 
 context:
   required:
@@ -55,13 +55,13 @@ Two key sources informed the design:
 
 ### In Scope
 
-- [ ] Define skill trigger phrases (when skill activates)
-- [ ] Define skill output format (checkpoint markdown)
-- [ ] Create checkpoint generation prompt/logic
-- [ ] Create delta generation prompt/logic
-- [ ] Write skill definition file
-- [ ] Test with example scenarios
-- [ ] Document usage in skill file
+- [x] Define skill trigger phrases (when skill activates)
+- [x] Define skill output format (checkpoint markdown)
+- [x] Create checkpoint generation prompt/logic
+- [x] Create delta generation prompt/logic
+- [x] Write skill definition file
+- [x] Test with example scenarios
+- [x] Document usage in skill file
 
 ### Out of Scope
 
@@ -71,13 +71,13 @@ Two key sources informed the design:
 
 ## Acceptance Criteria
 
-- [ ] Skill file created and functional
-- [ ] `/checkpoint` or similar trigger generates checkpoint following `specs/checkpoint-format.md`
-- [ ] `/delta` or similar trigger generates delta following `specs/delta-format.md`
-- [ ] Skill can be installed in Claude Code user skills directory
-- [ ] Generated checkpoints are self-contained (can resume work from checkpoint alone)
-- [ ] Generated deltas accurately capture changes between checkpoints
-- [ ] Skill works offline (no external API calls)
+- [x] Skill file created and functional
+- [x] `/checkpoint` or similar trigger generates checkpoint following `specs/checkpoint-format.md`
+- [x] `/delta` or similar trigger generates delta following `specs/delta-format.md`
+- [x] Skill can be installed in Claude Code user skills directory
+- [x] Generated checkpoints are self-contained (can resume work from checkpoint alone)
+- [x] Generated deltas accurately capture changes between checkpoints
+- [x] Skill works offline (no external API calls)
 
 ## Technical Design
 
@@ -205,3 +205,19 @@ Implement JWT-based auth with login/logout, protected routes, and session persis
 - Examples: `docs/examples/chk-*.md`, `docs/examples/delta-*.md`
 - ReSum paper: https://arxiv.org/pdf/2509.13313
 - Factory.ai article: https://factory.ai/news/compressing-context
+
+---
+
+## Resolution
+
+**Status**: Completed (2025-12-17)
+
+**Deliverables**:
+- `.claude/skills/coihuin-compress/SKILL.md` — skill definition with triggers and workflow
+- `.claude/skills/coihuin-compress/checkpoint-format.md` — checkpoint specification
+- `.claude/skills/coihuin-compress/delta-format.md` — delta specification
+- `.claude/skills/coihuin-compress/validate.py` — format validation script
+- `.claude/skills/coihuin-compress/examples/checkpoint.md` — reference checkpoint
+- `.claude/skills/coihuin-compress/examples/delta.md` — reference delta
+
+**Notes**: Skill is functional and installable. Real-world testing recommended as next step.

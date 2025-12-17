@@ -6,7 +6,7 @@ impact: additive
 version: minor
 status: ready
 created: 2025-12-14
-updated: 2025-12-14
+updated: 2025-12-17
 
 context:
   required:
@@ -42,11 +42,11 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 
 ### In Scope
 
-- [ ] Define breadcrumb data structure (what a breadcrumb contains)
-- [ ] Define breadcrumb categories (files, decisions, actions, external refs)
-- [ ] Specify how breadcrumbs integrate with checkpoint format
-- [ ] Specify breadcrumb lifecycle (when created, when pruned)
-- [ ] Define reconstruction protocol (how agent uses breadcrumbs to fetch context)
+- [x] Define breadcrumb data structure (what a breadcrumb contains)
+- [x] Define breadcrumb categories (files, decisions, actions, external refs)
+- [x] Specify how breadcrumbs integrate with checkpoint format
+- [x] Specify breadcrumb lifecycle (when created, when pruned)
+- [x] Define reconstruction protocol (how agent uses breadcrumbs to fetch context)
 - [ ] Add breadcrumbs section to checkpoint format spec
 
 ### Out of Scope
@@ -57,10 +57,10 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 
 ## Acceptance Criteria
 
-- [ ] Breadcrumb format specification documented
+- [x] Breadcrumb format specification documented (spec-002)
 - [ ] Integration with checkpoint-format.md complete
-- [ ] At least 3 breadcrumb categories defined with examples
-- [ ] Reconstruction protocol documented
+- [x] At least 3 breadcrumb categories defined with examples (file, function, decision, external)
+- [x] Reconstruction protocol documented
 - [ ] Example checkpoint with breadcrumbs section created
 
 ## Proposed Structure
@@ -79,12 +79,19 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 
 ## Notes
 
-### Key Questions
+### Key Questions (Resolved 2025-12-17)
 
-1. How many breadcrumbs before they become as expensive as full context?
-2. Should breadcrumbs have priority levels (always keep vs. can prune)?
-3. How does the agent decide when to follow a breadcrumb vs. continue without?
-4. Should breadcrumbs be validated (check if reference still exists)?
+1. **How many breadcrumbs before they become as expensive as full context?**
+   - **Answer**: No hard limit. Breadcrumbs cost ~10-20 tokens each; 50+ signals checkpoint design problem, not breadcrumb problem.
+
+2. **Should breadcrumbs have priority levels (always keep vs. can prune)?**
+   - **Answer**: No, not for v1. Breadcrumbs are already the compressed form. Add if real usage shows need.
+
+3. **How does the agent decide when to follow a breadcrumb vs. continue without?**
+   - **Answer**: Agent autonomy. Agent follows when needed, ignores when not. No rigid rules.
+
+4. **Should breadcrumbs be validated (check if reference still exists)?**
+   - **Answer**: No. Stale breadcrumbs are acceptable; cleanup happens via normal merge workflow. Staleness may be transient.
 
 ### Design Constraints
 
@@ -97,3 +104,4 @@ Breadcrumbs are **pointers, not content**. They tell the agent *where to look* r
 - Factory.ai: "Compressing Context" - Breadcrumbs concept
 - specs/checkpoint-format.md - Current checkpoint structure
 - specs/delta-format.md - Delta/incremental update structure
+- **spec-002** - Breadcrumbs format specification (created 2025-12-17)

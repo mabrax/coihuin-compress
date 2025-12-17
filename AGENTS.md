@@ -123,7 +123,12 @@ specs/
 ├── PROJECT.yaml      # Project definition
 ├── CONSTITUTION.md   # Rules and philosophy
 └── issues/
-    └── ISSUE-XXX.md  # Issue files
+    ├── active/       # Ready, draft, in-progress, blocked
+    │   ├── ISSUE-XXX.md
+    │   └── spec-XXX.md   # Spec collocated with issue
+    └── done/         # Completed issues
+        ├── ISSUE-XXX.md
+        └── spec-XXX.md   # Spec moves with issue when done
 
 .claude/commands/cspec/  # Slash commands (namespaced)
 ```
