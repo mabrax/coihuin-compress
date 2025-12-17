@@ -1,0 +1,13 @@
+# Archived checkpoints - do not load as context
+
+This directory contains archived checkpoints for:
+- Historical reference (how decisions were made)
+- Evaluation system (scoring examples)
+- Audit trail (project evolution)
+
+DO NOT use these for:
+- Current state reference
+- Resuming active work
+- Loading into Claude context
+
+File references may be outdated. Use checkpoints/active/ for current work.

@@ -4,9 +4,9 @@ title: "Enhance validation with semantic heuristics—structure isn't enough"
 nature: enhancement
 impact: additive
 version: minor
-status: draft
+status: done
 created: 2025-12-16
-updated: 2025-12-16
+updated: 2025-12-17
 
 context:
   required: []
@@ -37,12 +37,12 @@ This creates **false confidence**. Users see "Valid checkpoint" and assume quali
 
 ### In Scope
 
-- [ ] Add semantic heuristic warnings (not errors) to validate.py
-- [ ] Implement minimum content checks per section
-- [ ] Add recency/completeness indicators
-- [ ] Rename output to clarify what's being validated
-- [ ] Add "semantic quality" vs "structural validity" distinction
-- [ ] Consider adding interactive quality prompts
+- [x] Add semantic heuristic warnings (not errors) to validate.py
+- [x] Implement minimum content checks per section
+- [x] Add recency/completeness indicators
+- [x] Rename output to clarify what's being validated
+- [x] Add "semantic quality" vs "structural validity" distinction
+- [x] Consider adding interactive quality prompts
 
 ### Out of Scope
 
@@ -52,11 +52,11 @@ This creates **false confidence**. Users see "Valid checkpoint" and assume quali
 
 ## Acceptance Criteria
 
-- [ ] Validator distinguishes structural validity from semantic quality
-- [ ] Heuristic warnings for potentially weak checkpoints
-- [ ] Users understand what passing validation means (and doesn't mean)
-- [ ] Output clearly labels checks as "structural" vs "heuristic"
-- [ ] No false confidence from passing validation
+- [x] Validator distinguishes structural validity from semantic quality
+- [x] Heuristic warnings for potentially weak checkpoints
+- [x] Users understand what passing validation means (and doesn't mean)
+- [x] Output clearly labels checks as "structural" vs "heuristic"
+- [x] No false confidence from passing validation
 
 ## Notes
 

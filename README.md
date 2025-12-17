@@ -92,12 +92,10 @@ That's it. Claude Code will discover and use the skill automatically.
 
 ## Validation
 
-Validate checkpoint/delta format with the included Python script:
+Validate checkpoint format with the included Python script:
 
 ```bash
-uv run validate.py checkpoint <file>
-uv run validate.py delta <file>
-uv run validate.py <file>  # auto-detect type
+uv run format-check.py <file>
 ```
 
 ## Project Structure
@@ -106,15 +104,14 @@ uv run validate.py <file>  # auto-detect type
 .claude/skills/coihuin-compress/
 ├── SKILL.md               # Skill instructions
 ├── checkpoint-format.md   # Checkpoint specification
-├── delta-format.md        # Delta specification
-├── validate.py            # Format validator
+├── format-check.py        # Format validator
 └── examples/
-    ├── checkpoint.md      # Reference example
-    └── delta.md           # Reference example
+    ├── checkpoint-example.md  # Reference example for first checkpoint
+    └── checkpoint.md          # Additional checkpoint example
 
 checkpoints/
 ├── active/                # Currently active work
-└── archive/               # Completed, historical
+└── archive/               # Completed, historical (has .archive-marker)
 ```
 
 ## Background

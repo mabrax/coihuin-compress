@@ -19,7 +19,7 @@ coihuin-compress is a Claude Code skill for proactive context compression. The s
 | Delta format spec | `specs/delta-format.md` | Done |
 | Breadcrumbs spec | `specs/issues/active/spec-002.md` | Done |
 | Skill files | `.claude/skills/coihuin-compress/` | Done |
-| Validation script | `.claude/skills/coihuin-compress/validate.py` | Done |
+| Validation script | `.claude/skills/coihuin-compress/format-check.py` | Done |
 | Examples | `docs/examples/chk-*.md`, `delta-*.md` | Done |
 | Checkpoint directories | `checkpoints/active/`, `checkpoints/archive/` | Created |
 
