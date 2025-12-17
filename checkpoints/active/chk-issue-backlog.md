@@ -2,7 +2,7 @@
 checkpoint: chk-issue-backlog
 created: 2025-12-17T15:21:36Z
 anchor: post-dialectic-cleanup
-last_delta: 2025-12-17T20:29:37Z
+last_delta: 2025-12-17T20:56:59Z
 ---
 
 ## Problem
@@ -26,6 +26,7 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - **Dialectic evaluation model**: Human interview (5 questions) → Agent investigation (3 parallel tasks) → Correlation & synthesis
 - **Senior implementers for phases**: Used swarm of senior-implementer agents for parallel phase execution
 - **Delta-as-operation model**: Based on real-world usage, simplify from 3 concepts (checkpoint, delta artifact, merge) to 2 operations (checkpoint, delta). "Delta" becomes a verb meaning "update checkpoint with what changed"
+- **Subagent coherence validation**: Use 3 parallel Explore agents to validate issue-spec and tasks-spec coherence before implementation—catches misalignments early
 
 ### Technical Context
 
@@ -40,9 +41,10 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - Post-audit → ISSUE-004, ISSUE-009 closed during discussions → Complete
 - 2025-12-17 → ISSUE-005 invalidated, ADR-001 created, DEPENDENCIES.md updated → Complete
 - 2025-12-17 → ISSUE-011 spec created, reviewed, implemented via 4-phase plan → Complete
-- 2025-12-17 → ISSUE-006 reframed, spec + tasks created → Complete
-- 2025-12-17 → ISSUE-006 implemented via 4 phases (senior-implementer agents) → Complete
-- 2025-12-17 → ISSUE-012 discussed, spec + tasks created, agent-reviewed → Ready
+- 2025-12-17 → ISSUE-006 reframed, spec + tasks created, implemented → Complete
+- 2025-12-17 → ISSUE-012 discussed, spec + tasks created, implemented → Complete
+- 2025-12-17 → ISSUE-010 implemented directly (trivial scope) → Complete
+- 2025-12-17 → ISSUE-007 spec'd and tasks created, validated via subagent swarm → Ready
 
 ### Artifact Trail
 
@@ -55,9 +57,11 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 | `docs/examples/delta-*.md` | deleted | 4 stale delta example files removed |
 | `specs/issues/done/ISSUE-006.md` | moved | Implementation complete |
 | `specs/issues/done/spec-006.md` | moved | Preserved with issue |
-| `specs/issues/active/ISSUE-012.md` | modified | Refined scope, removed obsolete items |
-| `specs/issues/active/spec-012.md` | created | Format cleanup specification |
-| `specs/issues/active/TASKS-012.md` | created | 4-phase implementation plan |
+| `specs/issues/done/ISSUE-012.md` | done | Format cleanup complete |
+| `specs/issues/done/ISSUE-010.md` | done | Archive lifecycle complete |
+| `checkpoints/archive/.claudeignore` | created | Marker to prevent stale context loading |
+| `specs/issues/active/spec-007.md` | created | Two-layer validation system specification |
+| `specs/issues/active/TASKS-007.md` | created | 6-phase implementation plan (26 tasks) |
 
 ### Breadcrumbs
 
@@ -70,25 +74,25 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 | file | `specs/issues/done/spec-012.md` | Format cleanup spec with validation table |
 | file | `specs/issues/done/TASKS-012.md` | 4-phase implementation plan |
 | file | `.claude/skills/coihuin-compress/examples/checkpoint-example.md` | Reference example for first checkpoint |
+| file | `specs/issues/active/spec-007.md` | Two-layer validation spec with heuristics table |
+| file | `specs/issues/active/TASKS-007.md` | Implementation plan with parsing examples |
 
 ### Current State
 
-**3 active issues remaining:**
+**2 active issues remaining:**
 
 | Issue | Title | Status |
 |-------|-------|--------|
-| ISSUE-007 | Validation layers | Draft |
+| ISSUE-007 | Validation layers | Ready (spec + tasks complete) |
 | ISSUE-008 | Cognitive load / warnings | Draft |
-| ISSUE-010 | Archive lifecycle | Draft |
 
-**Done issues:** ISSUE-001, 002, 003, 004, 006, 009, 011, 012
+**Done issues:** ISSUE-001, 002, 003, 004, 006, 009, 010, 011, 012
 **Invalid issues:** ISSUE-005 (see ADR-001)
 
 ### Next Actions
 
-1. **Spec ISSUE-007** (Validation layers)—needs spec + tasks before implementation
-2. **Spec ISSUE-008** (Cognitive load / warnings)
-3. **Spec ISSUE-010** (Archive lifecycle)
+1. **Implement ISSUE-007** (Validation layers)—spec + tasks ready, can assign to junior implementers
+2. **Spec ISSUE-008** (Cognitive load / warnings)—last remaining draft issue
 
 ## User Rules
 
@@ -270,3 +274,98 @@ Post-review fixes:
 | Item | Before | After |
 |------|--------|-------|
 | Global skill | Stale (pre-ISSUE-006) | Synced with local repo |
+
+---
+
+## Delta: 2025-12-17T20:37:56Z
+
+### What Changed
+
+**ISSUE-010 implemented** - Archive lifecycle defined with marker file and documentation.
+
+### Session Work
+
+1. Compared remaining issues (007, 008, 010) for quick win
+2. ISSUE-010 identified as trivial—implemented directly without spec
+3. Created `.claudeignore` marker file in `checkpoints/archive/`
+4. Added Archive Limitations section to SKILL.md
+5. Updated directory structure documentation
+6. Synced global skill
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `checkpoints/archive/.claudeignore` | created | Marker file with usage guidance |
+| `checkpoints/archive/.gitkeep` | deleted | Replaced by .claudeignore |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Archive Limitations + directory structure |
+| `specs/issues/done/ISSUE-010.md` | moved | From active/, all criteria checked |
+| `~/.claude/skills/coihuin-compress/SKILL.md` | synced | Global skill updated |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-010 | Draft | Done |
+| Active issues | 3 | 2 |
+| Done issues | 8 | 9 |
+
+---
+
+## Delta: 2025-12-17T20:56:59Z
+
+### What Changed
+
+**ISSUE-007 spec'd and tasks created** - Two-layer validation system fully specified with implementation plan.
+
+### Session Work
+
+1. **Created spec-007.md**:
+   - Two-layer validation model (structural + semantic)
+   - 8 advisory heuristics including 2 recency checks
+   - Output format specification
+   - LLM self-check guidance for SKILL.md
+
+2. **Ran 3 parallel Explore agents for issue-spec coherence**:
+   - Scope coverage: Found missing recency indicators
+   - Acceptance criteria: PARTIAL (needed framing fixes)
+   - Internal consistency: MAJOR ISSUES (3 layers vs 2, out-of-scope violation)
+
+3. **Fixed coherence issues**:
+   - Changed from 3 layers to 2 layers per issue Resolution
+   - Removed out-of-scope AI analysis framing
+   - Added recency heuristics (checkpoint age >7 days, last_delta >3 days)
+   - Reframed heuristics as "advisory output" not separate layer
+
+4. **Created TASKS-007.md**:
+   - Phase 1: Rename script + update references
+   - Phase 2: Remove stale delta validation
+   - Phase 3: Add advisory heuristics
+   - Phase 4: Update output format
+   - Phase 5: Add SKILL.md self-check guidance
+   - Phase 6: Validate and finalize
+
+5. **Ran 3 parallel Explore agents for tasks validation**:
+   - Tasks→Spec alignment: 73% direct, 27% valid additions
+   - Spec→Tasks coverage: FULL (all 5 steps covered)
+   - Junior readiness: 90% (3 clarifications needed)
+
+6. **Fixed junior implementer clarity issues**:
+   - Task 1.3: Made conditional explicit
+   - Task 3.4: Added parsing examples + date format spec
+   - Task 6.2: Added cleanup step
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `specs/issues/active/spec-007.md` | created | Two-layer validation specification |
+| `specs/issues/active/TASKS-007.md` | created | 6-phase, 26-task implementation plan |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-007 | Draft | Ready |
+| Active issues (ready) | 0 | 1 |
+| Active issues (draft) | 2 | 1 |

@@ -4,9 +4,9 @@ title: "Define archive lifecycle—prevent orphaned artifacts"
 nature: enhancement
 impact: invisible
 version: patch
-status: draft
+status: done
 created: 2025-12-16
-updated: 2025-12-16
+updated: 2025-12-17
 
 context:
   required: []
@@ -48,11 +48,11 @@ This creates **false permanence**—artifact graveyards that look useful but pro
 
 ## Acceptance Criteria
 
-- [ ] Clear criteria for when to archive
-- [ ] Archive purpose documented (audit trail vs active use)
-- [ ] Staleness/decay acknowledged in documentation
-- [ ] Retention guidance provided
-- [ ] Users understand archived checkpoints may be outdated
+- [x] Clear criteria for when to archive
+- [x] Archive purpose documented (audit trail vs active use)
+- [x] Staleness/decay acknowledged in documentation
+- [x] Retention guidance provided
+- [x] Users understand archived checkpoints may be outdated
 
 ## Notes
 
