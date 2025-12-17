@@ -4,7 +4,7 @@ title: "Implement eval mechanism for checkpoint quality (dogfooding + LLM-as-jud
 nature: feature
 impact: additive
 version: minor
-status: draft
+status: ready
 created: 2025-12-16
 updated: 2025-12-16
 
@@ -54,13 +54,13 @@ Examples feed back into skill improvement
 
 ### In Scope
 
-- [ ] Design evaluation rubric for checkpoint quality
-- [ ] Define rubric dimensions (recoverability, completeness, clarity, token efficiency)
-- [ ] Create eval/ directory structure
-- [ ] Implement eval command or script (LLM-as-judge)
-- [ ] Define scoring thresholds for "good" checkpoints
-- [ ] Document the dogfooding workflow
-- [ ] Create process for promoting examples
+- [x] Design evaluation rubric for checkpoint quality
+- [x] Define rubric dimensions (recoverability, completeness, clarity, token efficiency)
+- [x] Create eval/ directory structure
+- [x] Implement eval command or script (LLM-as-judge)
+- [x] Define scoring thresholds for "good" checkpoints
+- [x] Document the dogfooding workflow
+- [x] Create process for promoting examples
 
 ### Out of Scope
 
@@ -70,11 +70,11 @@ Examples feed back into skill improvement
 
 ## Acceptance Criteria
 
-- [ ] Evaluation rubric documented with clear dimensions and criteria
-- [ ] eval/ directory structure defined
-- [ ] Eval script/command functional (can score a checkpoint)
+- [x] Evaluation rubric documented with clear dimensions and criteria
+- [x] eval/ directory structure defined
+- [x] Eval script/command functional (can score a checkpoint)
 - [ ] At least one real checkpoint evaluated as proof of concept
-- [ ] Workflow documented for collecting → evaluating → promoting examples
+- [x] Workflow documented for collecting → evaluating → promoting examples
 
 ## Notes
 

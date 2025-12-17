@@ -16,7 +16,6 @@ flowchart TB
     end
 
     subgraph quality[Quality & Validation]
-        I005[ISSUE-005<br/>Self-containment]
         I007[ISSUE-007<br/>Semantic validation]
         I011[ISSUE-011<br/>Eval mechanism]
     end
@@ -40,7 +39,23 @@ flowchart TB
     classDef ready fill:#1e40af,stroke:#1e3a8a,color:#fff
     classDef draft fill:#525252,stroke:#404040,color:#fff
 
-    class I001,I003,I004,I009 done
-    class I002 ready
-    class I005,I006,I007,I008,I010,I011,I012 draft
+    class I001,I002,I003,I004,I009 done
+    class I006,I007,I008,I010,I011,I012 draft
 ```
+
+## Summary
+
+| Status | Count | Issues |
+|--------|-------|--------|
+| Done | 5 | ISSUE-001, ISSUE-002, ISSUE-003, ISSUE-004, ISSUE-009 |
+| Draft | 6 | ISSUE-006, ISSUE-007, ISSUE-008, ISSUE-010, ISSUE-011, ISSUE-012 |
+| Ready | 0 | - |
+| Invalid | 1 | ISSUE-005 (see [ADR-001](decisions/ADR-001-issue-005-invalid.md)) |
+
+## Legend
+
+- **Green**: Completed
+- **Blue**: Ready to work on
+- **Gray**: Draft / backlog
+- **Solid arrow**: Direct dependency
+- **Dashed arrow**: Soft/informing relationship

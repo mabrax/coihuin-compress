@@ -117,3 +117,56 @@ checkpoints/
 1. **Must Keep**: Problem, session intent, decisions, current state, next actions
 2. **Should Keep**: Recent artifact trail, recent play-by-play, technical context, breadcrumbs
 3. **Can Summarize**: Older play-by-play, completed artifacts, historical decisions
+
+## Checkpoint Evaluation
+
+Evaluate checkpoint quality using a dialectic process that combines human judgment with agent verification.
+
+### Usage
+
+```
+/eval-checkpoint <name>
+```
+
+Place checkpoints to evaluate in `eval/inbox/`. The command expects a checkpoint filename (with or without `.md` extension).
+
+### The 3-Phase Dialectic Process
+
+1. **Human Interview**: User answers 5 questions (one per quality dimension) about the checkpoint. Answers map to preliminary scores (A=5, B=4, C=3, D=2, E=1).
+
+2. **Agent Investigation**: Three parallel verification tasks:
+   - Artifact verification (files exist and match descriptions)
+   - Breadcrumb validation (references are valid)
+   - Git correlation (play-by-play matches commit history)
+
+3. **Correlation & Synthesis**: Agent evidence modifies human scores. Strong supporting evidence can raise scores; contradictions lower them. Final weighted score determines quality.
+
+### Quality Dimensions
+
+| Dimension | Weight | What It Measures |
+|-----------|--------|------------------|
+| Recoverability | 30% | Could a fresh agent resume work from this alone? |
+| Completeness | 20% | Are all required sections meaningfully filled? |
+| Clarity | 20% | Is the language unambiguous without prior context? |
+| Token Efficiency | 15% | Is information dense without unnecessary verbosity? |
+| Actionability | 15% | Are Next Actions specific enough to execute? |
+
+See `eval/rubric.md` for detailed scoring criteria per dimension.
+
+### Dogfooding Workflow
+
+The evaluation system supports continuous improvement through example collection:
+
+```
+eval/
+├── inbox/      # Checkpoints awaiting evaluation
+├── scored/     # Evaluated checkpoints with scores
+└── promoted/   # High-quality examples (score >= 4.0)
+```
+
+**Workflow**:
+1. **Collect**: Copy checkpoints into `eval/inbox/` for evaluation
+2. **Evaluate**: Run `/eval-checkpoint <name>` to score
+3. **Promote**: Checkpoints scoring >= 4.0 (with no dimension below 3 and Recoverability >= 4) can be promoted to `eval/promoted/` as reference examples
+
+Promoted checkpoints serve as canonical examples of well-structured state snapshots.

@@ -14,6 +14,21 @@ Long coding sessions with Claude lose critical context when automatic summarizat
 
 Instead of waiting for context to overflow and get summarized away, create explicit **checkpoints** (state snapshots) at meaningful moments—phase complete, major decision made, session end. When continuing work, load the checkpoint and **merge** new progress into it.
 
+## Philosophy: Lines of Work, Not Archives
+
+> **Checkpoints track active lines of work—they are not permanent knowledge archives.**
+
+This distinction is fundamental. A checkpoint represents a **cohesive thread of activity** with a clear beginning and end. Right now you might be working on implementing a feature, fixing a bug, or enhancing a tool. That's one line of work.
+
+**Key principles:**
+
+- **Bounded scope**: Each checkpoint tracks ONE coherent effort—not everything you know
+- **Ephemeral by nature**: When the work completes, archive the checkpoint. It served its purpose.
+- **Parallel streams**: You can have multiple active checkpoints for different concurrent efforts
+- **Working memory, not documentation**: This is about maintaining context during active work, not creating permanent records
+
+The archive exists for evaluation and reference, but the real value is in the **active** checkpoints—the ones tracking work in progress right now.
+
 ## Core Concepts
 
 | Concept | Definition |
