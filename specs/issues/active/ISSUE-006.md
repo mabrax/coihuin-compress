@@ -1,12 +1,12 @@
 ---
 id: ISSUE-006
-title: "Clarify delta purpose—documentation not reconstruction"
+title: "Simplify to delta-as-operation model"
 nature: enhancement
-impact: invisible
-version: patch
-status: draft
+impact: visible
+version: minor
+status: ready
 created: 2025-12-16
-updated: 2025-12-16
+updated: 2025-12-17
 
 context:
   required: []
@@ -18,115 +18,74 @@ blocks: []
 
 ## Problem
 
-The delta format specification implies deltas enable state reconstruction:
+The current model has three concepts that confuse users:
+1. **checkpoint** → create a snapshot
+2. **delta** → create a delta *artifact file*
+3. **merge** → combine delta into checkpoint
 
-> "Deltas capture incremental changes between two checkpoints... enabling efficient state reconstruction"
+In practice, users always skip delta file creation and just want to update the checkpoint. The mental overhead of "delta files" and "merge" is unnecessary.
 
-But the delta model's assumptions don't hold:
+## Real-World Usage Feedback
 
-1. **Clean boundaries assumed**: Checkpoints are fuzzy—work doesn't have clean boundaries
-2. **Deterministic diffing assumed**: "What changed" requires interpretation, not computation
-3. **Mechanical merge assumed**: "Replace Current State entirely" isn't a delta merge—it's a full rewrite
+After a half-week of using the skill, the actual pattern is:
+- Create checkpoint at session start
+- Work on tasks
+- Say "add the delta to the checkpoint" (meaning: update it with what changed)
+- Never create separate delta files
 
-**Reality**: If you lost chk-002, you can't apply delta-001-002 to chk-001 and get chk-002. You'd get an approximation at best.
+The word "delta" already carries semantic meaning (change/difference). Using it as a verb—"delta the checkpoint"—is intuitive.
 
-Deltas serve **documentation** (audit trail, change history) not **computation** (state reconstruction). They're git commit messages, not git diffs.
+## Proposed Model
+
+**Simplified to two operations:**
+
+| Command | Action |
+|---------|--------|
+| `checkpoint` | Create a fresh snapshot |
+| `delta` | Update existing checkpoint with what changed |
+
+No intermediate artifacts. No merge step. Git provides version history.
 
 ## Scope
 
 ### In Scope
 
-- [ ] Revise delta-format.md to accurately describe purpose
-- [ ] Remove or qualify "state reconstruction" claims
-- [ ] Clarify deltas are audit trails / change documentation
-- [ ] Update SKILL.md delta description
-- [ ] Consider renaming "Merge Instructions" to "Change Summary" or removing
-- [ ] Add honest "Limitations" section to delta spec
+- [x] Reframe issue to reflect delta-as-operation model
+- [ ] Update SKILL.md: remove delta artifact creation, rename "merge" to "delta"
+- [ ] Archive or remove `delta-format.md` (artifact spec no longer needed)
+- [ ] Update checkpoint format if needed (inline delta sections stay)
+- [ ] Update any references to "merge" command
 
 ### Out of Scope
 
-- Redesigning deltas to actually enable reconstruction
-- Removing delta functionality
-- Adding computational diff capabilities
+- Changing checkpoint format structure
+- Removing inline delta sections from checkpoints (those are useful)
+- Git integration features
 
 ## Acceptance Criteria
 
-- [ ] Delta purpose clearly stated as documentation/audit, not reconstruction
-- [ ] No misleading claims about mechanical applicability
-- [ ] "Merge Instructions" section renamed or purpose clarified
-- [ ] Users understand deltas are narrative, not algorithmic
-- [ ] Spec includes honest limitations section
+- [ ] SKILL.md describes only two operations: checkpoint and delta
+- [ ] No references to delta artifact files in documentation
+- [ ] No references to "merge" as a separate command
+- [ ] `delta-format.md` archived or removed
+- [ ] User can say "delta" and the checkpoint gets updated
 
 ## Notes
 
-### Proposed Delta Reframing
+### What Stays
 
-**Current**: "Deltas capture incremental changes... enabling efficient state reconstruction"
+- **Inline delta sections** in checkpoints (the `## Delta: <timestamp>` sections)
+- **Intelligent update logic** (identify changes, avoid redundancy)
+- **Git for history** (`git log`, `git diff` for progression)
 
-**Proposed**: "Deltas document what changed between checkpoints, providing an audit trail for understanding how work evolved. They are narrative summaries, not computational diffs—they help humans understand progression but don't mechanically reconstruct state."
+### What Goes
 
-### On "Merge Instructions"
+- Delta as a separate artifact file
+- The "merge" command/concept
+- `delta-format.md` as an active spec
 
-The current "Merge Instructions" section reads like executable steps but can't actually be executed mechanically. Options:
+### Historical Context
 
-1. **Remove**: Section adds false precision
-2. **Rename to "Change Summary"**: Descriptive, not prescriptive
-3. **Keep but caveat**: "These are guidelines, not algorithmic instructions"
-
-### Audit Origin
-
-Dialectic audit tension #3: Delta's Theoretical Promise vs Practical Complexity
-
-### Severity
-
-Medium—misleading but deltas still useful for audit trails
-
----
-
-## Reframing (2025-12-16)
-
-**Discussion outcome**: The audit misunderstood delta's purpose. Delta isn't about "reconstruction"—it's about **intelligent merging**.
-
-### What Delta Actually Does
-
-When you say "merge," you're telling the system: "Figure out what changed and add only the valuable new stuff to the checkpoint. Don't repeat, don't bloat."
-
-```
-Session 1: Create checkpoint (fresh state)
-    ↓
-Session 2: Load checkpoint → work → "merge"
-    ↓
-System: Identifies what changed → adds only new valuable info
-    ↓
-Checkpoint grows without redundancy
-```
-
-### Git Already Provides Delta Artifacts
-
-| Need | Git Solution |
-|------|--------------|
-| Version history | `git log checkpoints/active/chk-feature.md` |
-| Diffs between versions | `git diff HEAD~1 checkpoints/active/chk-feature.md` |
-| Full state at any point | `git show <commit>:path/to/checkpoint.md` |
-
-**The delta as a separate artifact file is redundant with Git.**
-
-### Revised Scope
-
-| Component | Action |
-|-----------|--------|
-| Delta **command** ("merge") | Keep—valuable for intelligent updates |
-| Delta **logic** | Keep—avoids redundancy in checkpoints |
-| Delta **artifact files** | Make optional—Git provides this |
-| Delta **format spec** | Simplify—only for edge cases outside Git |
-
-### New Actions
-
-1. ~~Clarify delta purpose~~ → Delta purpose is intelligent merging, not reconstruction
-2. Make delta file generation optional in SKILL.md
-3. Add guidance for using Git to track checkpoint progression
-4. Simplify delta-format.md (optional artifact, not required workflow)
-
-**Insight**: Don't duplicate what Git already does. Focus on intelligent state management, not artifact generation.
+Originally from dialectic audit tension #3. Initial reframing (2025-12-16) identified that delta = intelligent merging and Git provides history. This update (2025-12-17) goes further based on real usage: eliminate the delta artifact entirely, make "delta" the verb for updating checkpoints.
 
 **Reference**: history/2025-12-16-dialectic-audit.md, Appendix A, Discussion 3

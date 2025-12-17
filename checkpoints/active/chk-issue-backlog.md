@@ -2,12 +2,12 @@
 checkpoint: chk-issue-backlog
 created: 2025-12-17T15:21:36Z
 anchor: post-dialectic-cleanup
-last_delta: 2025-12-17T16:04:55Z
+last_delta: 2025-12-17T18:40:14Z
 ---
 
 ## Problem
 
-After the dialectic audit, coihuin-compress has 6 active issues (down from 7) that need implementation. These represent refinements and enhancements identified through critical self-examination of the skill.
+After the dialectic audit, coihuin-compress has active issues that need implementation. These represent refinements and enhancements identified through critical self-examination of the skill.
 
 ## Session Intent
 
@@ -25,6 +25,7 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - **Archive marker file**: Use `.claudeignore` to prevent Claude loading stale checkpoints
 - **Dialectic evaluation model**: Human interview (5 questions) → Agent investigation (3 parallel tasks) → Correlation & synthesis
 - **Senior implementers for phases**: Used swarm of senior-implementer agents for parallel phase execution
+- **Delta-as-operation model**: Based on real-world usage, simplify from 3 concepts (checkpoint, delta artifact, merge) to 2 operations (checkpoint, delta). "Delta" becomes a verb meaning "update checkpoint with what changed"
 
 ### Technical Context
 
@@ -40,48 +41,50 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - 2025-12-17 → ISSUE-005 invalidated, ADR-001 created, DEPENDENCIES.md updated → Complete
 - 2025-12-17 → ISSUE-011 spec created and reviewed (spec-011.md) → Complete
 - 2025-12-17 → ISSUE-011 implemented via 4-phase plan with senior implementers → Complete
+- 2025-12-17 → ISSUE-006 reframed based on real-world usage feedback → Complete
+- 2025-12-17 → spec-006.md created, validated against issue → Complete
+- 2025-12-17 → TASKS-006.md created, validated against spec, fixes applied → Complete
 
 ### Artifact Trail
 
 | File | Status | Key Change |
 |------|--------|------------|
-| `specs/issues/active/ISSUE-005.md` | deleted | Invalidated—superseded by ISSUE-011 |
-| `specs/issues/decisions/ADR-001-issue-005-invalid.md` | created | Documents invalidation rationale |
-| `specs/issues/DEPENDENCIES.md` | modified | Removed ISSUE-005, added Invalid row |
-| `specs/issues/active/spec-011.md` | created | Full evaluation specification |
-| `specs/issues/SPEC-TEMPLATE.md` | created | Template for future specs |
-| `specs/issues/active/TASKS-011.md` | created | Implementation plan for ISSUE-011 |
-| `eval/rubric.md` | created | Checkpoint quality rubric (5 dimensions, 1-5 scale) |
-| `eval/inbox/.gitkeep` | created | Directory for checkpoints awaiting eval |
-| `eval/scored/.gitkeep` | created | Directory for evaluated checkpoints |
-| `eval/promoted/.gitkeep` | created | Directory for high-scoring examples |
-| `.claude/commands/eval-checkpoint.md` | created | Slash command for dialectic eval process |
-| `.claude/skills/coihuin-compress/SKILL.md` | modified | Added Checkpoint Evaluation section |
-| `specs/issues/active/ISSUE-011.md` | modified | Status → ready, scope/acceptance checked |
+| `specs/issues/active/ISSUE-006.md` | modified | Reframed: "Simplify to delta-as-operation model", status=ready |
+| `specs/issues/active/spec-006.md` | created | Full specification for delta-as-operation model |
+| `specs/issues/active/TASKS-006.md` | created | 4-phase implementation plan with validation hooks |
+
+### Breadcrumbs
+
+| Type | Reference | Hint |
+|------|-----------|------|
+| file | `specs/issues/active/spec-006.md` | Delta-as-operation specification |
+| file | `specs/issues/active/TASKS-006.md` | Implementation plan for ISSUE-006 |
+| file | `eval/rubric.md` | Canonical scoring rubric |
+| file | `.claude/commands/eval-checkpoint.md` | Full dialectic eval command |
+| file | `.claude/skills/coihuin-compress/SKILL.md:121-172` | Checkpoint Evaluation section |
 
 ### Current State
 
-**5 active issues remaining:**
+**4 active issues remaining:**
 
-| Issue | Title | Resolution Status |
-|-------|-------|-------------------|
-| ISSUE-006 | Delta purpose clarification | Reframed: delta = merge logic, Git = history |
-| ISSUE-007 | Validation layers | Resolved: rename to format-check.py, add LLM semantic |
-| ISSUE-008 | Cognitive load / warnings | Resolved: warnings not automation |
-| ISSUE-010 | Archive lifecycle | Resolved: marker file approach |
-| ISSUE-012 | Clean up format spec | New: remove noise, relocate example |
+| Issue | Title | Status |
+|-------|-------|--------|
+| ISSUE-006 | Simplify to delta-as-operation model | Ready (spec + tasks complete) |
+| ISSUE-007 | Validation layers | Draft |
+| ISSUE-008 | Cognitive load / warnings | Draft |
+| ISSUE-010 | Archive lifecycle | Draft |
+| ISSUE-012 | Clean up format spec | Draft |
 
 **Done issues:** ISSUE-001, 002, 003, 004, 009, 011
 **Invalid issues:** ISSUE-005 (see ADR-001)
 
 ### Next Actions
 
-1. **Implement ISSUE-007** (Validation rename + LLM semantic checks)
+1. **Implement ISSUE-006** - Execute TASKS-006.md (4 phases: delete delta files, update SKILL.md, update checkpoint-format.md, validate)
 2. **Implement ISSUE-012** (Format spec cleanup)—quick win, low risk
-3. **Implement ISSUE-006** (Delta docs update)—clarify purpose
+3. **Implement ISSUE-007** (Validation rename + LLM semantic checks)
 4. **Implement ISSUE-008** (Warning guidance in SKILL.md)
 5. **Implement ISSUE-010** (Add .claudeignore to archive/)
-6. **(Optional)** Test `/eval-checkpoint` with a real checkpoint
 
 ## User Rules
 
@@ -91,52 +94,34 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 
 ---
 
-## Delta: 2025-12-17T16:04:55Z
+## Delta: 2025-12-17T18:40:14Z
 
 ### What Changed
 
-**ISSUE-011 fully implemented** via 4-phase plan executed by senior implementer swarm.
+**ISSUE-006 fully specified and ready for implementation** based on user's real-world feedback from using the skill.
+
+### Key Insight
+
+User reported: "I always say do not write the delta and only add it." This revealed that the three-concept model (checkpoint, delta artifact, merge) was overcomplicated. The new model has two operations:
+- `checkpoint` = create fresh snapshot
+- `delta` = update existing checkpoint with what changed
 
 ### Artifacts
 
 | File | Action | Description |
 |------|--------|-------------|
-| `specs/issues/active/TASKS-011.md` | created | Implementation plan with 4 phases |
-| `eval/inbox/.gitkeep` | created | Preserve directory in git |
-| `eval/scored/.gitkeep` | created | Preserve directory in git |
-| `eval/promoted/.gitkeep` | created | Preserve directory in git |
-| `eval/rubric.md` | created | Canonical rubric (5 dimensions, scoring, promotion criteria) |
-| `.claude/commands/eval-checkpoint.md` | created | `/eval-checkpoint` slash command |
-| `.claude/skills/coihuin-compress/SKILL.md` | modified | Added Checkpoint Evaluation section (lines 121-172) |
-| `specs/issues/active/ISSUE-011.md` | modified | Status=ready, 7/7 scope items, 4/5 acceptance criteria |
+| `specs/issues/active/ISSUE-006.md` | modified | Reframed title and scope to delta-as-operation model |
+| `specs/issues/active/spec-006.md` | created | Full spec with design decisions, removals, SKILL.md changes, implementation steps |
+| `specs/issues/active/TASKS-006.md` | created | 4-phase plan: delete files, update SKILL.md, update checkpoint-format, validate |
 
-### Implementation Process
+### Validations Performed
 
-4 phases executed with senior implementers:
-1. **Phase 1**: Created eval/ directory structure + rubric.md
-2. **Phase 2**: Created `/eval-checkpoint` slash command
-3. **Phase 3**: Updated SKILL.md with eval documentation
-4. **Phase 4**: Validated and updated ISSUE-011.md
-
-5 explore agents validated implementation in parallel:
-- Directory structure: PASS
-- Rubric content vs spec: PASS
-- Command content vs spec: PASS
-- SKILL.md updates: PASS
-- ISSUE-011.md updates: PASS
+1. **spec vs issue**: 5/5 scope items PASS, 5/5 acceptance criteria PASS
+2. **tasks vs spec**: 100% coverage, correct order, all files listed, 3 minor fixes applied
 
 ### Status Transitions
 
 | Item | Before | After |
 |------|--------|-------|
-| ISSUE-011 | Spec complete, ready for implementation | Implemented, status=ready |
-| Active issues | 6 | 5 |
-
-### Breadcrumbs
-
-| Type | Reference | Hint |
-|------|-----------|------|
-| file | `eval/rubric.md` | Canonical scoring rubric |
-| file | `.claude/commands/eval-checkpoint.md` | Full dialectic eval command |
-| file | `specs/issues/active/TASKS-011.md` | Implementation plan template |
-| file | `.claude/skills/coihuin-compress/SKILL.md:121-172` | Checkpoint Evaluation section |
+| ISSUE-006 | Draft | Ready (spec + tasks complete) |
+| Active issues | 5 | 4 (ISSUE-006 ready to implement) |
