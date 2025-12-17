@@ -4,7 +4,7 @@ title: "Simplify to delta-as-operation model"
 nature: enhancement
 impact: visible
 version: minor
-status: ready
+status: done
 created: 2025-12-16
 updated: 2025-12-17
 
@@ -51,10 +51,10 @@ No intermediate artifacts. No merge step. Git provides version history.
 ### In Scope
 
 - [x] Reframe issue to reflect delta-as-operation model
-- [ ] Update SKILL.md: remove delta artifact creation, rename "merge" to "delta"
-- [ ] Archive or remove `delta-format.md` (artifact spec no longer needed)
-- [ ] Update checkpoint format if needed (inline delta sections stay)
-- [ ] Update any references to "merge" command
+- [x] Update SKILL.md to reflect delta-as-operation model
+- [x] Archive or remove delta-format.md and related specs
+- [x] Update checkpoint format if needed (added last_delta field)
+- [x] Update any references to "merge" command (removed)
 
 ### Out of Scope
 
@@ -64,11 +64,11 @@ No intermediate artifacts. No merge step. Git provides version history.
 
 ## Acceptance Criteria
 
-- [ ] SKILL.md describes only two operations: checkpoint and delta
-- [ ] No references to delta artifact files in documentation
-- [ ] No references to "merge" as a separate command
-- [ ] `delta-format.md` archived or removed
-- [ ] User can say "delta" and the checkpoint gets updated
+- [x] SKILL.md describes only two operations (checkpoint, delta)
+- [x] No references to delta artifact files remain
+- [x] No references to "merge" as separate command
+- [x] delta-format.md archived or removed
+- [x] User can say "delta" and checkpoint gets updated
 
 ## Notes
 

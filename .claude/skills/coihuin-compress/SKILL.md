@@ -1,6 +1,6 @@
 ---
 name: coihuin-compress
-description: Proactive context compression for long coding sessions. Creates checkpoints (state snapshots) and deltas (incremental changes). Use when the user asks to "create checkpoint", "checkpoint", "save state", "compress context", "create delta", "delta", "what changed", or "merge checkpoint".
+description: Proactive context compression for long coding sessions. Creates checkpoints (state snapshots) and deltas (incremental changes). Use when the user asks to "create checkpoint", "checkpoint", "save state", "compress context", "create delta", "delta", "update checkpoint", or "what changed".
 ---
 
 # Coihuin Compress
@@ -18,7 +18,7 @@ Session 1 (new work):
 Session 2+ (continuing):
   → User loads checkpoint manually
   → work...
-  → "merge" → generates delta + merges into checkpoint
+  → "delta" → updates checkpoint with what changed
 
 Done:
   → move checkpoint to archive/
@@ -45,41 +45,24 @@ Create new state snapshot from scratch.
 
 ### Delta
 
-Show incremental changes since loaded checkpoint (without merging).
+Update an existing checkpoint with changes from the current session.
 
-**Trigger**: "delta", "create delta", "what changed"
-
-**Prerequisite**: User has loaded existing checkpoint into context.
-
-**When**: Want to see changes without merging, or need standalone delta for audit.
-
-**How**:
-1. Read `delta-format.md` for structure
-2. Load the source checkpoint
-3. Categorize changes: Added / Modified / Removed / Status Transitions
-4. Generate delta following the format
-5. Validate: `uv run validate.py delta <file>`
-
-### Merge
-
-Generate delta and apply to loaded checkpoint.
-
-**Trigger**: "merge", "merge checkpoint", "update checkpoint"
+**Trigger**: "delta", "update checkpoint", "add delta"
 
 **Prerequisite**: User has loaded existing checkpoint into context.
 
 **How**:
-1. Generate delta (comparing loaded checkpoint vs current session)
-2. Show delta to user for review
-3. Apply changes to checkpoint:
+1. Identify what changed since the checkpoint was created
+2. Update the relevant checkpoint sections:
    - **Decisions**: Append new decisions
    - **Play-By-Play**: Append new entries, summarize old
    - **Artifact Trail**: Update file statuses, add new files
    - **Current State**: Replace entirely
    - **Next Actions**: Replace entirely
-4. Update `created` timestamp in frontmatter
-5. Output merged checkpoint (user saves to file)
-6. Optionally output delta for audit
+3. Optionally add inline delta markers for visibility
+4. Output updated checkpoint for user to save
+
+> **Note**: Git tracks checkpoint file history, so separate delta artifacts are unnecessary. The checkpoint itself evolves, with Git providing the audit trail of changes.
 
 ### Archive
 
@@ -89,7 +72,7 @@ Move completed checkpoint to historical storage.
 
 **How**:
 1. Move from `checkpoints/active/` to `checkpoints/archive/`
-2. Optionally keep associated deltas for audit trail
+2. Git history provides the audit trail of checkpoint evolution
 
 ## Directory Structure
 
@@ -107,9 +90,7 @@ checkpoints/
 | File | Purpose |
 |------|---------|
 | `checkpoint-format.md` | Checkpoint structure specification |
-| `delta-format.md` | Delta structure specification |
 | `examples/checkpoint.md` | Reference checkpoint example |
-| `examples/delta.md` | Reference delta example |
 | `validate.py` | Format validation script |
 
 ## Priority Hierarchy (token pressure)

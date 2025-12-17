@@ -76,6 +76,7 @@ anchor: <reference to conversation point or phase>
 | `checkpoint` | Yes | Unique identifier (e.g., `chk-001`, `session-abc-003`) |
 | `created` | Yes | ISO-8601 timestamp of checkpoint creation |
 | `anchor` | No | Reference to conversation turn or phase this summarizes up to |
+| `last_delta` | No | ISO-8601 timestamp of last delta operation |
 
 ### Body Sections
 
@@ -131,6 +132,7 @@ Create a new checkpoint when:
 checkpoint: chk-003
 created: 2025-12-14T15:30:00Z
 anchor: end-of-phase-2
+last_delta: 2025-12-14T16:45:00Z  # optional
 ---
 
 ## Problem
