@@ -89,6 +89,12 @@ Two sources shaped the design:
 
 The name comes from the [coihue](https://en.wikipedia.org/wiki/Nothofagus_dombeyi), a southern beech tree native to Patagonia.
 
+## Author
+
+Built by [Felipe Valenzuela Beck](https://mabrax.ai) — Production AI Toolsmith.
+
+This skill exists because I got tired of re-explaining context to Claude after long sessions. Now I use it daily on every project.
+
 ## License
 
 MIT
