@@ -6,122 +6,93 @@ A **Claude Code skill** for proactive context compression in long coding session
 
 ## The Problem
 
-Long coding sessions with Claude lose critical context when automatic summarization occurs. Decisions get forgotten, file locations disappear, and progress evaporates. You end up re-explaining the same things multiple times.
+Long coding sessions lose critical context when automatic summarization occurs. Decisions get forgotten, file locations disappear, progress evaporates. You re-explain the same things multiple times.
 
 ## The Solution
 
 **Proactive compression at natural breakpoints**, not reactive compression when forced by token limits.
 
-Instead of waiting for context to overflow and get summarized away, create explicit **checkpoints** (state snapshots) at meaningful moments—phase complete, major decision made, session end. When continuing work, load the checkpoint and **merge** new progress into it.
+Create **checkpoints** (state snapshots) at meaningful moments. Update them with **deltas** as work progresses. Archive when done.
 
-## Philosophy: Lines of Work, Not Archives
+## Core Operations
 
-> **Checkpoints track active lines of work—they are not permanent knowledge archives.**
-
-This distinction is fundamental. A checkpoint represents a **cohesive thread of activity** with a clear beginning and end. Right now you might be working on implementing a feature, fixing a bug, or enhancing a tool. That's one line of work.
-
-**Key principles:**
-
-- **Bounded scope**: Each checkpoint tracks ONE coherent effort—not everything you know
-- **Ephemeral by nature**: When the work completes, archive the checkpoint. It served its purpose.
-- **Parallel streams**: You can have multiple active checkpoints for different concurrent efforts
-- **Working memory, not documentation**: This is about maintaining context during active work, not creating permanent records
-
-The archive exists for evaluation and reference, but the real value is in the **active** checkpoints—the ones tracking work in progress right now.
-
-## Core Concepts
-
-| Concept | Definition |
-|---------|------------|
-| **Checkpoint** | Point-in-time snapshot of work state. Self-contained, loadable, resumable. |
-| **Delta** | Incremental changes between checkpoints. Shows what changed without full regeneration. |
-| **Merge** | Apply delta to existing checkpoint, producing updated state. |
-
-## What Must Survive
-
-Based on [Factory.ai's research](https://factory.ai/news/compressing-context), checkpoints preserve:
-
-- **Session Intent** — What you're trying to achieve
-- **Decisions** — Locked-in choices (never re-ask these)
-- **Play-By-Play** — High-level action history
-- **Artifact Trail** — Files created/modified/deleted
-- **Current State** — What exists now
-- **Next Actions** — What comes next
+| Operation | When | What |
+|-----------|------|------|
+| **Checkpoint** | New work, fresh start | Create state snapshot from scratch |
+| **Delta** | Continuing work | Update existing checkpoint with changes |
+| **Archive** | Work complete | Move to `checkpoints/archive/` |
 
 ## Workflow
 
 ```
 Session 1 (new work):
-  → "checkpoint" → creates new checkpoint → save to checkpoints/active/
+  → "checkpoint" → creates snapshot → save to checkpoints/active/
 
 Session 2+ (continuing):
   → load checkpoint manually
   → work...
-  → "merge" → generates delta + merges into checkpoint
+  → "delta" → updates checkpoint with what changed
 
 Done:
-  → move checkpoint to checkpoints/archive/
+  → move to checkpoints/archive/
 ```
 
-## Installation
+## What Gets Preserved
 
-Copy the skill directory to your project:
+Based on [Factory.ai's research](https://factory.ai/news/compressing-context):
+
+- **Problem** — What you're solving
+- **Decisions** — Locked-in choices (never re-ask these)
+- **Play-By-Play** — High-level action history
+- **Artifact Trail** — Files created/modified/deleted
+- **Current State** — What exists now
+- **Next Actions** — What comes next
+- **Breadcrumbs** — Lightweight references for navigation
+
+## Installation
 
 ```bash
 cp -r .claude/skills/coihuin-compress /path/to/your/project/.claude/skills/
 ```
 
-That's it. Claude Code will discover and use the skill automatically.
+Claude Code discovers and uses the skill automatically.
 
 ## Usage
 
-**Create new checkpoint:**
-```
-"checkpoint" or "create checkpoint" or "save state"
-```
-
-**See what changed (without merging):**
-```
-"delta" or "what changed"
-```
-
-**Merge changes into loaded checkpoint:**
-```
-"merge" or "merge checkpoint"
-```
+| Action | Trigger |
+|--------|---------|
+| Create checkpoint | "checkpoint", "save state" |
+| Update checkpoint | "delta", "update checkpoint" |
 
 ## Validation
-
-Validate checkpoint format with the included Python script:
 
 ```bash
 uv run format-check.py <file>
 ```
 
+Checks structure. Semantic quality is self-checked via guidance in SKILL.md.
+
 ## Project Structure
 
 ```
 .claude/skills/coihuin-compress/
-├── SKILL.md               # Skill instructions
+├── SKILL.md               # Skill instructions (source of truth)
 ├── checkpoint-format.md   # Checkpoint specification
 ├── format-check.py        # Format validator
-└── examples/
-    ├── checkpoint-example.md  # Reference example for first checkpoint
-    └── checkpoint.md          # Additional checkpoint example
+└── examples/              # Reference checkpoints
 
 checkpoints/
-├── active/                # Currently active work
-└── archive/               # Completed, historical (has .archive-marker)
+├── active/                # Work in progress
+└── archive/               # Completed (.archive-marker)
 ```
 
 ## Background
 
-This Claude Code skill formalizes a workflow I'd been using informally. Two sources shaped the design:
+Two sources shaped the design:
+1. **[ReSum](https://arxiv.org/pdf/2509.13313)** (Alibaba NLP) — Context summarization research
+2. **[Factory.ai](https://factory.ai/news/compressing-context)** — "What Must Survive" categories
 
-1. **[ReSum](https://arxiv.org/pdf/2509.13313)** (Alibaba NLP) — Context summarization for long-horizon search intelligence
-2. **[Factory.ai](https://factory.ai/news/compressing-context)** — "What Must Survive" categories, proactive vs reactive compression
-
-The name comes from the [coihue](https://en.wikipedia.org/wiki/Nothofagus_dombeyi) (Nothofagus dombeyi), a southern beech tree native to Patagonia.
+The name comes from the [coihue](https://en.wikipedia.org/wiki/Nothofagus_dombeyi), a southern beech tree native to Patagonia.
 
 ## License
 

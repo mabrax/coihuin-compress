@@ -93,7 +93,7 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 ### Next Actions
 
 1. **Archive this checkpoint**—all issues resolved, backlog complete
-2. **Commit changes**—ISSUE-008 implementation not yet committed
+2. **Update README**—compress to match current reality (delta-as-operation model)
 
 ## User Rules
 
@@ -454,6 +454,8 @@ Post-review fixes:
    - Revised "proactive" explanation blockquote
    - Added "Proactive Advisory Triggers" section with triggers table, examples, principles
    - Synced global skill
+
+5. **Committed**: `c9945c9` feat(ISSUE-008): Add proactive advisory triggers to skill
 
 ### Artifacts
 
