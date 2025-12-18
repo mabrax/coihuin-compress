@@ -124,3 +124,50 @@ Create a new checkpoint when:
 3. **Context shift**: Work direction changes substantially
 4. **Session break**: Before ending a session
 5. **Pre-compression**: Before context window pressure
+
+## Delta Format
+
+Deltas are **not separate files**—they are `## Delta:` sections appended inline to the checkpoint file. This keeps all state in one place while Git tracks the evolution.
+
+### Structure
+
+```markdown
+---
+
+## Delta: <ISO-8601 timestamp>
+
+### What Changed
+
+[One-sentence summary of what was accomplished]
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `path/to/file` | created/modified/deleted | Brief description |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase/Task name | Previous status | New status |
+```
+
+### Delta Fields
+
+| Section | Required | Purpose |
+|---------|----------|---------|
+| What Changed | Yes | Brief summary of the session's work |
+| Artifacts | Yes | Files created, modified, or deleted |
+| Status Transitions | No | Track phase/task state changes |
+
+### When to Add a Delta
+
+Add a delta when:
+- Significant work has been completed since checkpoint creation or last delta
+- You want to preserve progress before ending a session
+- Major artifacts have been created or modified
+
+Update the `last_delta` field in the checkpoint frontmatter when adding a delta.
+
+See `examples/checkpoint-with-delta.md` for a complete example.

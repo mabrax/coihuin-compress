@@ -133,9 +133,9 @@ checkpoints/
 
 | File | Purpose |
 |------|---------|
-| `checkpoint-format.md` | Checkpoint structure specification |
-| `examples/checkpoint-example.md` | Reference example for first-time checkpoint creation |
-| `examples/checkpoint.md` | Additional checkpoint example |
+| `checkpoint-format.md` | Checkpoint and delta structure specification |
+| `examples/checkpoint.md` | Initial checkpoint example (no deltas yet) |
+| `examples/checkpoint-with-delta.md` | Checkpoint with deltas example (shows accumulation) |
 | `format-check.py` | Format validation script |
 
 ## Priority Hierarchy (token pressure)
