@@ -1,13 +1,13 @@
 ---
 name: coihuin-compress
-description: Proactive context compression for long coding sessions. Creates checkpoints (state snapshots) and deltas (incremental changes). Use when the user asks to "create checkpoint", "checkpoint", "save state", "compress context", "create delta", "delta", "update checkpoint", or "what changed".
+description: Proactive context compression for long coding sessions. Creates checkpoints (state snapshots) and deltas (incremental changes). Use when the user asks to checkpoint/delta, OR when suggesting checkpointing at phase completions, major decisions, before risky operations, or after extended work sessions.
 ---
 
 # Coihuin Compress
 
 Proactive context compression at natural breakpoints, not reactive to token limits.
 
-> **What "proactive" means**: The proactiveness is *human* proactiveness—the user consciously recognizes milestones and chooses to preserve state before context fills. This contrasts with *reactive* compression where the system forces summarization when limits are hit (damage control). Here, compression is intentional state management triggered at natural breakpoints.
+> **What "proactive" means**: The skill proactively suggests checkpointing at natural moments (phase completion, major decisions, before risky operations), but the user always decides whether to act. This contrasts with *reactive* compression where the system forces summarization when limits are hit.
 
 ## Workflow
 
@@ -81,6 +81,41 @@ Move completed checkpoint to historical storage.
 
 Use for: understanding decisions, auditing evolution, onboarding context.
 Do NOT use for: resuming work, current state, Claude context loading.
+
+## Proactive Advisory Triggers
+
+The skill should suggest checkpointing/delta at natural moments. These are advisory—user always decides.
+
+### When to Suggest
+
+| Trigger | Suggest When |
+|---------|--------------|
+| Phase completion | A milestone, phase, or significant task completes |
+| Major decision | An architectural or design decision is made |
+| Before risky ops | About to start refactor, migration, or major change |
+| Extended session | 5+ file modifications accumulated |
+| Context shift | Work direction changing substantially |
+| Session end | User indicates ending ("let's continue tomorrow") |
+
+### What to Suggest
+
+Adapt the suggestion to session state:
+
+**No checkpoint loaded:**
+> You've completed [milestone]. This is a natural checkpoint moment—would you like me to create one?
+
+**Checkpoint loaded:**
+> You've made significant progress since loading the checkpoint. Would you like me to update it with a delta?
+
+**Before risky operation:**
+> Before starting this [operation], you might want to preserve the current state. Should I create/update the checkpoint?
+
+### Advisory Principles
+
+- **Suggest, don't execute**: Wait for user confirmation
+- **Be specific**: Name the milestone or trigger reason
+- **Don't nag**: One suggestion per trigger moment, not repeated reminders
+- **Accept "no"**: If user declines, continue without further prompting
 
 ## Directory Structure
 

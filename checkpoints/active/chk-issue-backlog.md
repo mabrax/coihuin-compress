@@ -2,7 +2,7 @@
 checkpoint: chk-issue-backlog
 created: 2025-12-17T15:21:36Z
 anchor: post-dialectic-cleanup
-last_delta: 2025-12-17T20:56:59Z
+last_delta: 2025-12-18T00:28:40Z
 ---
 
 ## Problem
@@ -22,11 +22,12 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - **Delta = intelligent merge**: Delta command/logic is valuable; delta artifact files are optional since Git provides history
 - **Two-layer validation**: Structural (format-check.py) + Semantic (LLM in-skill)
 - **Warnings not automation**: Proactive triggers should be advisory, user decides
-- **Archive marker file**: Use `.claudeignore` to prevent Claude loading stale checkpoints
+- **Archive marker file**: Use `.archive-marker` (renamed from `.claudeignore` to avoid implying gitignore-style parsing)
 - **Dialectic evaluation model**: Human interview (5 questions) → Agent investigation (3 parallel tasks) → Correlation & synthesis
 - **Senior implementers for phases**: Used swarm of senior-implementer agents for parallel phase execution
 - **Delta-as-operation model**: Based on real-world usage, simplify from 3 concepts (checkpoint, delta artifact, merge) to 2 operations (checkpoint, delta). "Delta" becomes a verb meaning "update checkpoint with what changed"
 - **Subagent coherence validation**: Use 3 parallel Explore agents to validate issue-spec and tasks-spec coherence before implementation—catches misalignments early
+- **Context-aware advisory**: Proactive triggers suggest checkpoint vs delta based on session state (no checkpoint loaded → suggest checkpoint; checkpoint loaded → suggest delta)
 
 ### Technical Context
 
@@ -44,24 +45,27 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 - 2025-12-17 → ISSUE-006 reframed, spec + tasks created, implemented → Complete
 - 2025-12-17 → ISSUE-012 discussed, spec + tasks created, implemented → Complete
 - 2025-12-17 → ISSUE-010 implemented directly (trivial scope) → Complete
-- 2025-12-17 → ISSUE-007 spec'd and tasks created, validated via subagent swarm → Ready
+- 2025-12-17 → ISSUE-007 spec'd and tasks created, validated via subagent swarm → Complete
+- 2025-12-17 → ISSUE-007 implemented via senior-implementer, review analyzed, P1 fix applied → Complete
+- 2025-12-17 → ISSUE-008 researched, spec'd, implemented directly (documentation-only) → Complete
 
 ### Artifact Trail
 
 | File | Status | Key Change |
 |------|--------|------------|
-| `.claude/skills/coihuin-compress/SKILL.md` | modified | New delta definition, removed merge section |
-| `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Added `last_delta` frontmatter field |
-| `.claude/skills/coihuin-compress/delta-format.md` | deleted | Delta artifact spec no longer needed |
-| `specs/delta-format.md` | deleted | Duplicate delta spec removed |
-| `docs/examples/delta-*.md` | deleted | 4 stale delta example files removed |
-| `specs/issues/done/ISSUE-006.md` | moved | Implementation complete |
-| `specs/issues/done/spec-006.md` | moved | Preserved with issue |
-| `specs/issues/done/ISSUE-012.md` | done | Format cleanup complete |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Two-layer validation, semantic self-check section |
+| `.claude/skills/coihuin-compress/format-check.py` | created | Renamed from validate.py, added 8 advisory heuristics |
+| `.claude/skills/coihuin-compress/validate.py` | deleted | Replaced by format-check.py |
+| `checkpoints/archive/.archive-marker` | renamed | From .claudeignore (clearer naming) |
+| `specs/issues/done/ISSUE-007.md` | moved | Two-layer validation complete |
+| `specs/issues/done/spec-007.md` | moved | Preserved with issue |
+| `specs/issues/done/TASKS-007.md` | moved | 6-phase implementation plan |
 | `specs/issues/done/ISSUE-010.md` | done | Archive lifecycle complete |
-| `checkpoints/archive/.claudeignore` | created | Marker to prevent stale context loading |
-| `specs/issues/active/spec-007.md` | created | Two-layer validation system specification |
-| `specs/issues/active/TASKS-007.md` | created | 6-phase implementation plan (26 tasks) |
+| `README.md` | modified | Updated validation section, archive marker reference |
+| `STATUS.md` | modified | Updated validation script path |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Proactive Advisory Triggers section added |
+| `specs/issues/done/ISSUE-008.md` | moved | Proactive triggers complete |
+| `specs/issues/done/spec-008.md` | moved | Advisory triggers specification |
 
 ### Breadcrumbs
 
@@ -69,30 +73,27 @@ Track and implement the remaining issues from the dialectic audit to mature the 
 |------|-----------|------|
 | file | `eval/rubric.md` | Canonical scoring rubric |
 | file | `.claude/commands/eval-checkpoint.md` | Full dialectic eval command |
-| file | `.claude/skills/coihuin-compress/SKILL.md:45-68` | New Delta operation section |
-| commit | `ee727b7` | ISSUE-006 implementation commit |
-| file | `specs/issues/done/spec-012.md` | Format cleanup spec with validation table |
-| file | `specs/issues/done/TASKS-012.md` | 4-phase implementation plan |
-| file | `.claude/skills/coihuin-compress/examples/checkpoint-example.md` | Reference example for first checkpoint |
-| file | `specs/issues/active/spec-007.md` | Two-layer validation spec with heuristics table |
-| file | `specs/issues/active/TASKS-007.md` | Implementation plan with parsing examples |
+| file | `.claude/skills/coihuin-compress/SKILL.md:112-144` | Semantic Quality Self-Check section |
+| file | `.claude/skills/coihuin-compress/format-check.py` | Two-layer validation script |
+| commit | `8032abe` | ISSUE-007 implementation commit |
+| commit | `eaf17bf` | Checkpoint update and ISSUE-010 finalization |
+| file | `specs/issues/done/spec-007.md` | Two-layer validation spec with heuristics table |
+| file | `specs/issues/done/TASKS-007.md` | 6-phase implementation plan |
+| file | `.claude/skills/coihuin-compress/SKILL.md:85-118` | Proactive Advisory Triggers section |
+| file | `specs/issues/done/spec-008.md` | Advisory triggers specification |
 
 ### Current State
 
-**2 active issues remaining:**
+**All issues complete.** The dialectic audit backlog is fully resolved.
 
-| Issue | Title | Status |
-|-------|-------|--------|
-| ISSUE-007 | Validation layers | Ready (spec + tasks complete) |
-| ISSUE-008 | Cognitive load / warnings | Draft |
-
-**Done issues:** ISSUE-001, 002, 003, 004, 006, 009, 010, 011, 012
+**Done issues:** ISSUE-001, 002, 003, 004, 006, 007, 008, 009, 010, 011, 012
 **Invalid issues:** ISSUE-005 (see ADR-001)
+**Active issues:** None
 
 ### Next Actions
 
-1. **Implement ISSUE-007** (Validation layers)—spec + tasks ready, can assign to junior implementers
-2. **Spec ISSUE-008** (Cognitive load / warnings)—last remaining draft issue
+1. **Archive this checkpoint**—all issues resolved, backlog complete
+2. **Commit changes**—ISSUE-008 implementation not yet committed
 
 ## User Rules
 
@@ -369,3 +370,107 @@ Post-review fixes:
 | ISSUE-007 | Draft | Ready |
 | Active issues (ready) | 0 | 1 |
 | Active issues (draft) | 2 | 1 |
+
+---
+
+## Delta: 2025-12-17T21:17:46Z
+
+### What Changed
+
+**ISSUE-007 implemented** - Two-layer validation system complete with advisory heuristics and semantic self-check guidance.
+
+### Session Work
+
+1. **Implemented ISSUE-007** via senior-implementer agent:
+   - Phase 1: Renamed validate.py → format-check.py
+   - Phase 2: Removed stale delta validation code
+   - Phase 3: Added 8 advisory heuristics (content + recency checks)
+   - Phase 4: Updated output format (structural/advisory sections)
+   - Phase 5: Added Semantic Quality Self-Check to SKILL.md
+   - Phase 6: Validated and moved issue to done/
+
+2. **Analyzed external review** (4 issues flagged):
+   - P0 (Delta validation dropped): FALSE POSITIVE—intentionally removed per ISSUE-006
+   - P1 (.claudeignore format): TRUE POSITIVE—renamed to .archive-marker
+   - P2 (Untracked script): FALSE POSITIVE—by design, no auto-commit
+   - P3 (Delta docs missing): FALSE POSITIVE—depends on P0
+
+3. **Fixed P1**: Renamed `.claudeignore` → `.archive-marker`, updated SKILL.md and README.md
+
+4. **Committed changes**:
+   - `8032abe`: feat(ISSUE-007): Implement two-layer validation system
+   - `eaf17bf`: chore: Update checkpoint and finalize ISSUE-010
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/format-check.py` | created | Renamed from validate.py, 8 advisory heuristics |
+| `.claude/skills/coihuin-compress/validate.py` | deleted | Replaced by format-check.py |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Semantic Quality Self-Check section added |
+| `checkpoints/archive/.archive-marker` | renamed | From .claudeignore |
+| `specs/issues/done/ISSUE-007.md` | moved | All criteria checked |
+| `specs/issues/done/spec-007.md` | moved | Preserved with issue |
+| `specs/issues/done/TASKS-007.md` | moved | 6-phase plan |
+| `README.md` | modified | Validation section, archive marker |
+| `STATUS.md` | modified | Script path |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-007 | Ready | Done |
+| Active issues | 2 | 1 |
+| Done issues | 9 | 10 |
+
+---
+
+## Delta: 2025-12-18T00:28:40Z
+
+### What Changed
+
+**ISSUE-008 implemented** - Proactive advisory triggers added to SKILL.md. All dialectic audit issues now complete.
+
+### Session Work
+
+1. **Researched proactive triggers** via claude-code-guide agent:
+   - Validated "warnings not automation" approach aligns with Claude Code skill philosophy
+   - Skills should be advisory, not autonomous
+   - Description field triggers Claude's attention; user decides action
+
+2. **Refined ISSUE-008 requirements**:
+   - Context-aware advisory: checkpoint vs delta based on session state
+   - Natural language suggestions (not slash commands—this is a skill)
+   - Corrected research output that incorrectly suggested `/checkpoint`
+
+3. **Created spec-008.md**:
+   - 6 trigger conditions (phase completion, major decision, risky ops, etc.)
+   - Context-aware advisory logic table
+   - Natural language message examples
+   - 4 advisory principles
+
+4. **Implemented directly** (documentation-only, no TASKS file needed):
+   - Updated SKILL.md description with advisory triggers
+   - Revised "proactive" explanation blockquote
+   - Added "Proactive Advisory Triggers" section with triggers table, examples, principles
+   - Synced global skill
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `specs/issues/active/ISSUE-008.md` | modified | Status ready, added refinement section |
+| `specs/issues/active/spec-008.md` | created | Advisory triggers specification |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Description, proactive explanation, new section |
+| `~/.claude/skills/coihuin-compress/SKILL.md` | synced | Global skill updated |
+| `specs/issues/done/ISSUE-008.md` | moved | From active/, all criteria checked |
+| `specs/issues/done/spec-008.md` | moved | From active/ |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| ISSUE-008 | Draft | Done |
+| Active issues | 1 | 0 |
+| Done issues | 10 | 11 |
+| Backlog status | In progress | **Complete** |

@@ -4,17 +4,16 @@ title: "Reduce cognitive load—add proactive compression triggers"
 nature: feature
 impact: additive
 version: minor
-status: draft
+status: done
 created: 2025-12-16
-updated: 2025-12-16
+updated: 2025-12-17
 
 context:
   required: []
   recommended: []
 
 depends_on: []
-blocks:
-  - ISSUE-004
+blocks: []
 ---
 
 ## Problem
@@ -144,3 +143,20 @@ Focus on **warnings**, not proactive triggers that automate:
 **Insight**: Warnings reduce cognitive load without removing human control. They also generate learning data for improving the system.
 
 **Reference**: history/2025-12-16-dialectic-audit.md, Appendix A, Discussion 5
+
+### Refinement (2025-12-17)
+
+**Context-aware advisories**: The suggested action should adapt to session state:
+
+| Session State | Advisory Action |
+|---------------|-----------------|
+| No active checkpoint | Suggest "create checkpoint" |
+| Working from loaded checkpoint | Suggest "delta" (update) |
+
+**Natural language format**: Since the skill is invoked by Claude, use conversational suggestions:
+
+> You've completed Phase X. This is a natural checkpoint moment—would you like me to create one?
+
+> You've made significant progress since loading the checkpoint. Would you like me to update it with a delta?
+
+**Validation**: Research confirms this approach aligns with Claude Code skill design philosophy—advisory signals that guide without automating.
