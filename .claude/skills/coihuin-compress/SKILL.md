@@ -66,13 +66,22 @@ Update an existing checkpoint with changes from the current session.
 
 ### Archive
 
-Move completed checkpoint to historical storage.
+Mark checkpoint as complete and move to historical storage.
+
+**Trigger**: "archive", "archive checkpoint"
 
 **When**: Feature/epic complete, work finished.
 
 **How**:
-1. Move from `checkpoints/active/` to `checkpoints/archive/`
-2. Git history provides the audit trail of checkpoint evolution
+1. Add `## Completion` section to the checkpoint:
+   ```markdown
+   ## Completion
+   - **Status**: Archived
+   - **Outcome**: [Brief description of what was achieved]
+   - **Date**: [ISO-8601 timestamp]
+   ```
+2. Move from `checkpoints/active/` to `checkpoints/archive/`
+3. Git history provides the audit trail of checkpoint evolution
 
 **Archive Limitations**: Archived checkpoints are historical snapshots, not live state:
 - File references may be outdated (files moved, renamed, deleted)

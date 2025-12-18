@@ -14,28 +14,26 @@ Long coding sessions lose critical context when automatic summarization occurs. 
 
 Create **checkpoints** (state snapshots) at meaningful moments. Update them with **deltas** as work progresses. Archive when done.
 
-## Core Operations
+## You Drive It
 
-| Operation | When | What |
-|-----------|------|------|
-| **Checkpoint** | New work, fresh start | Create state snapshot from scratch |
-| **Delta** | Continuing work | Update existing checkpoint with changes |
-| **Archive** | Work complete | Move to `checkpoints/archive/` |
+**You** know when you've achieved something important. You're the one who decides when to checkpoint or delta.
+
+Think of it like saving a game — you don't wait for the game to tell you. You save when you've made progress you don't want to lose.
+
+## Scope
+
+One checkpoint = one focused task. A feature, a phase, a research question. Not an entire project—just the thing you're working on right now.
 
 ## Workflow
 
 ```
-Session 1 (new work):
-  → "checkpoint" → creates snapshot → save to checkpoints/active/
-
-Session 2+ (continuing):
-  → load checkpoint manually
-  → work...
-  → "delta" → updates checkpoint with what changed
-
-Done:
-  → move to checkpoints/archive/
+1. Working on something     → "checkpoint"      → Claude creates file
+2. New session              → read the file     → Claude has full context
+3. Continue working         → "delta"           → checkpoint updated
+4. Done                     → "archive"         → moved to archive/
 ```
+
+That's it. The checkpoint file IS the context—Claude reads it and knows exactly where you left off.
 
 ## What Gets Preserved
 
@@ -59,18 +57,15 @@ Claude Code discovers and uses the skill automatically.
 
 ## Usage
 
-| Action | Trigger |
-|--------|---------|
-| Create checkpoint | "checkpoint", "save state" |
-| Update checkpoint | "delta", "update checkpoint" |
+Talk to Claude Code. Invoke the skill explicitly:
 
-## Validation
+| Action | Say |
+|--------|-----|
+| Create checkpoint | "use compress skill to create checkpoint" |
+| Update checkpoint | "use compress skill to add delta" |
+| Finish & archive | "use compress skill to archive" |
 
-```bash
-uv run format-check.py <file>
-```
-
-Checks structure. Semantic quality is self-checked via guidance in SKILL.md.
+The skill handles everything: format, naming, file location.
 
 ## Project Structure
 

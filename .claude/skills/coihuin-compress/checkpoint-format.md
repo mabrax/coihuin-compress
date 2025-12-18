@@ -65,6 +65,12 @@ anchor: <reference to conversation point or phase>
 
 ## User Rules
 [Constraints and preferences the agent must follow]
+
+## Completion
+[Only present when checkpoint is archived]
+- **Status**: Archived
+- **Outcome**: Brief description of what was achieved
+- **Date**: ISO-8601 timestamp
 ```
 
 ## Field Definitions
@@ -92,6 +98,7 @@ anchor: <reference to conversation point or phase>
 | Next Actions | Yes | Pending work | Replace entirely each checkpoint |
 | Breadcrumbs | No | Minimal references for context reconstruction | Prune stale entries opportunistically during merge |
 | User Rules | No | Constraints | Copy forward unless changed |
+| Completion | No | Archive marker with outcome | Added only when archiving |
 
 ## Information Priority Hierarchy
 
