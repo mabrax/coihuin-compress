@@ -81,6 +81,13 @@ Is a checkpoint loaded in context?
 - User says "done", "finished", "complete", or similar
 - No pending blockers remain
 
+Completion checklist (verify before suggesting archive):
+- [ ] Every Next Action item addressed or explicitly deferred
+- [ ] No unresolved blockers in Current State
+- [ ] Original Problem statement satisfied
+- [ ] No "TODO" or "FIXME" mentions in recent work
+- [ ] User sentiment indicates closure (not "one more thing")
+
 **"Work diverging"** means:
 - See Fork Detection section below
 
@@ -222,18 +229,23 @@ Mark checkpoint as complete and move to historical storage.
 **When**: Feature/epic complete, work finished.
 
 **How**:
-1. Add `## Completion` section to the checkpoint:
+1. Capture outcome from user before archiving:
+   > Before archiving, let me capture the outcome:
+   > - What was achieved? (1-2 sentences)
+   > - Any learnings or gotchas worth preserving?
+2. Add `## Completion` section to the checkpoint:
    ```markdown
    ## Completion
    - **Status**: Archived
-   - **Outcome**: [Brief description of what was achieved]
+   - **Outcome**: [User's description of what was achieved]
+   - **Learnings**: [Any gotchas or insights, or "None noted"]
    - **Date**: [ISO-8601 timestamp]
    ```
-2. Move from `checkpoints/active/` to `checkpoints/archive/`
-3. Update `checkpoints/active/INDEX.md`:
+3. Move from `checkpoints/active/` to `checkpoints/archive/`
+4. Update `checkpoints/active/INDEX.md`:
    - Remove row from Quick Reference Table
    - Remove Summary Section
-4. Git history provides the audit trail of checkpoint evolution
+5. Git history provides the audit trail of checkpoint evolution
 
 **Archive Limitations**: Archived checkpoints are historical snapshots, not live state:
 - File references may be outdated (files moved, renamed, deleted)
@@ -257,6 +269,7 @@ The skill should suggest checkpointing/delta at natural moments. These are advis
 | Extended session | 5+ file modifications accumulated |
 | Context shift | Work direction changing substantially |
 | Session end | User indicates ending ("let's continue tomorrow") |
+| Work complete | All Next Actions done, user says "done/finished", no blockers remain |
 
 ### What to Suggest
 
@@ -270,6 +283,9 @@ Adapt the suggestion to session state:
 
 **Before risky operation:**
 > Before starting this [operation], you might want to preserve the current state. Should I create/update the checkpoint?
+
+**Work complete:**
+> All Next Actions appear done and no blockers remain. Would you like to archive this checkpoint? Before archiving, I'll ask what was achieved and any learnings to preserve.
 
 ### Advisory Principles
 

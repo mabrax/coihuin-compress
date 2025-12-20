@@ -12,4 +12,4 @@
 
 **Scope**: `.claude/skills/coihuin-compress/`, `scripts/sync-check.sh`, `plan/`
 
-**Status**: Phase 3 complete. Next: Phase 4 (Proactive Archive Suggestion).
+**Status**: Phase 4 complete. Next: Phase 5 (format-check.py INDEX Validation).
