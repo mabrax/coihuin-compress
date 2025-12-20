@@ -82,7 +82,7 @@ Is a checkpoint loaded in context?
 - No pending blockers remain
 
 **"Work diverging"** means:
-- See Fork Detection section (Phase 3)
+- See Fork Detection section below
 
 ### Backward Compatibility
 
@@ -95,6 +95,79 @@ Explicit commands still work and take precedence:
 | "archive", "archive checkpoint" | Always archives checkpoint |
 
 The unified command is a convenience—it doesn't replace explicit operations. Users who prefer direct control can continue using specific commands.
+
+## Fork Detection
+
+Identify when work diverges into parallel streams that warrant separate checkpoints.
+
+### Strong Fork Signals
+
+Any single strong signal suggests forking:
+
+| Signal | Example |
+|--------|---------|
+| User explicitly says work is unrelated | "This is a different feature entirely" |
+| Work needs its own implementation plan | "Let me plan how to approach this new subsystem" |
+| Multiple issues/tickets involved | "While I'm here, let me also fix ISSUE-234" |
+| Different milestone/epic | "Actually, let's work on the Q2 goals instead" |
+| Fundamental context switch | "Forget auth—let's do the billing integration" |
+
+### Weak Fork Signals
+
+Two or more weak signals together suggest forking:
+
+| Signal | Example |
+|--------|---------|
+| Working in entirely different files | From `src/auth/` to `src/payments/` |
+| Scope expanding beyond original intent | "We should also add..." (repeatedly) |
+| New dependencies introduced | Adding a library unrelated to current work |
+| Different stakeholders affected | "This will need review from the payments team" |
+| Time gap with context shift | "I was working on X, but now I want to do Y" |
+
+### Not a Fork
+
+These do NOT indicate a fork—continue with the current checkpoint:
+
+| Pattern | Why It's Not a Fork |
+|---------|---------------------|
+| Trivial fixes in passing | Typo corrections, lint fixes, small cleanup |
+| Config/tooling changes | Adjusting build config, updating deps, CI tweaks |
+| Supporting changes for main work | Adding a utility function needed by the feature |
+| Refactoring to enable the goal | Restructuring code to implement the main objective |
+| Test additions for current work | Writing tests for the feature being built |
+
+### Fork Decision Flow
+
+When fork signals are detected, prompt the user with options:
+
+```
+Work seems to be diverging from the current checkpoint scope.
+
+Current checkpoint: chk-auth-system
+  Scope: User authentication and session management
+
+Detected: [describe the divergent work]
+
+Options:
+  A) Create separate checkpoint for new work
+     → Archives current progress, starts fresh checkpoint for new scope
+
+  B) Continue with current checkpoint
+     → Expands scope to include new work (update Problem section)
+
+  C) Abandon divergent work
+     → Set aside new work, refocus on original scope
+
+Which would you prefer?
+```
+
+### Fork Advisory Principles
+
+- **Never auto-fork**: Always present options to the user; never automatically create checkpoints
+- **Always confirm**: Even with strong signals, the user decides what constitutes a "fork"
+- **Respect "no"**: If user chooses to continue with current checkpoint, don't re-suggest
+- **Explain the signal**: Tell the user why you think work is diverging
+- **Low friction**: If user says "just continue", update the checkpoint scope rather than nagging
 
 ## Operations
 

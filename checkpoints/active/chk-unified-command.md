@@ -1,8 +1,8 @@
 ---
 checkpoint: chk-unified-command
 created: 2025-12-20T19:40:43Z
-anchor: Phase 2 complete
-last_delta: 2025-12-20T20:02:56Z
+anchor: Phase 3 complete
+last_delta: 2025-12-20T20:14:48Z
 ---
 
 ## Problem
@@ -40,7 +40,7 @@ Implement the 5-phase enhancement plan documented in `plan/unified-command-imple
 | Type | Reference | Hint |
 |------|-----------|------|
 | file | `plan/unified-command-implementation.md` | Full 5-phase implementation plan with success criteria |
-| file | `.claude/skills/coihuin-compress/SKILL.md` | Main skill definition (Phase 1 + Phase 2 changes) |
+| file | `.claude/skills/coihuin-compress/SKILL.md` | Main skill definition (Phases 1-3 changes) |
 | file | `.claude/skills/coihuin-compress/index-format.md` | INDEX.md format specification (created in Phase 1) |
 | file | `scripts/sync-check.sh` | Local/global sync utility (enhanced with --sync flag) |
 | file | `CHANGELOG.md` | Documents planned features in [Unreleased] section |
@@ -50,13 +50,14 @@ Implement the 5-phase enhancement plan documented in `plan/unified-command-imple
 - Phase 1.1-1.5 → INDEX.md foundation → Spec, SKILL.md updates, directory structure
 - Post-Phase 1 → Enhanced sync-check.sh → --sync flag, --help, handles missing global
 - Phase 2.1-2.5 → Unified Command section → Trigger phrases, decision tree, context detection, backward compatibility
+- Phase 3.1-3.6 → Fork Detection section → Strong/weak signals, not-a-fork cases, decision flow, advisory principles
 
 ### Artifact Trail
 
 | File | Status | Key Change |
 |------|--------|------------|
 | `.claude/skills/coihuin-compress/index-format.md` | created | INDEX.md format specification |
-| `.claude/skills/coihuin-compress/SKILL.md` | modified | Phase 1: INDEX steps; Phase 2: Unified Command section |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Phases 1-3: INDEX steps, Unified Command, Fork Detection |
 | `scripts/sync-check.sh` | modified | Added --sync flag, --help, initial sync for missing global dir |
 | `CHANGELOG.md` | created | Documents planned features |
 | `plan/unified-command-implementation.md` | created | Full implementation plan |
@@ -65,26 +66,26 @@ Implement the 5-phase enhancement plan documented in `plan/unified-command-imple
 
 **Phase 1: INDEX.md Foundation** - COMPLETE
 **Phase 2: Unified Command Workflow** - COMPLETE
-- Added Unified Command section to SKILL.md after Workflow
-- Trigger phrases defined: "use compress skill", "compress", "compress skill"
-- Decision tree covers: no checkpoint, checkpoint loaded + work, work complete, work diverging
-- Context detection rules defined for all states
-- Backward compatibility documented
+**Phase 3: Fork Detection** - COMPLETE
+- Added Fork Detection section to SKILL.md after Unified Command
+- Strong signals: 5 patterns (any single one triggers suggestion)
+- Weak signals: 5 patterns (2+ together trigger suggestion)
+- Not-a-fork cases: 5 patterns clearly documented
+- Decision flow with 3 options (create separate, continue current, abandon)
+- Advisory principles: never auto-fork, always confirm, respect "no"
 - Local and global skill directories in sync
 
 **Remaining phases**:
-- Phase 3: Fork Detection (6 tasks)
 - Phase 4: Proactive Archive Suggestion (5 tasks)
 - Phase 5: format-check.py INDEX Validation (6 tasks)
 
 ### Next Actions
 
-1. **Phase 3.1**: Add "Fork Detection" section to SKILL.md after Unified Command
-2. **Phase 3.2**: Define strong fork signals (user says unrelated, needs impl plan, multi-issue)
-3. **Phase 3.3**: Define weak fork signals (different files, scope creep)
-4. **Phase 3.4**: Define what is NOT a fork (trivial fixes, config changes)
-5. **Phase 3.5**: Write fork decision flow with user prompt options (A/B/C)
-6. **Phase 3.6**: Add advisory principles (always ask, never auto-fork)
+1. **Phase 4.1**: Add "Proactive Archive" section to SKILL.md after Fork Detection
+2. **Phase 4.2**: Define explicit triggers (user says "archive this")
+3. **Phase 4.3**: Define proactive triggers (all Next Actions complete, user says "done")
+4. **Phase 4.4**: Write suggestion format (checklist of completion indicators)
+5. **Phase 4.5**: Add outcome capture prompt (ask user what was achieved before archiving)
 
 ## User Rules
 
@@ -111,3 +112,23 @@ Completed Phase 2: Added Unified Command section to SKILL.md with trigger phrase
 | Item | Before | After |
 |------|--------|-------|
 | Phase 2: Unified Command Workflow | pending | complete |
+
+---
+
+## Delta: 2025-12-20T20:14:48Z
+
+### What Changed
+
+Completed Phase 3: Added Fork Detection section to SKILL.md with strong/weak signals, not-a-fork cases, decision flow with 3 options, and advisory principles.
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Added Fork Detection section (72 lines) after Unified Command |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase 3: Fork Detection | pending | complete |

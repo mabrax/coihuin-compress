@@ -12,4 +12,4 @@
 
 **Scope**: `.claude/skills/coihuin-compress/`, `scripts/sync-check.sh`, `plan/`
 
-**Status**: Phase 2 complete. Next: Phase 3 (Fork Detection).
+**Status**: Phase 3 complete. Next: Phase 4 (Proactive Archive Suggestion).
