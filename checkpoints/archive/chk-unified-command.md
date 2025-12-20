@@ -60,35 +60,26 @@ Implement the 5-phase enhancement plan documented in `plan/unified-command-imple
 |------|--------|------------|
 | `.claude/skills/coihuin-compress/index-format.md` | created | INDEX.md format specification |
 | `.claude/skills/coihuin-compress/SKILL.md` | modified | Phases 1-4: INDEX, Unified Command, Fork Detection, Proactive Archive |
+| `.claude/skills/coihuin-compress/format-check.py` | modified | Phase 5: INDEX.md validation support |
 | `scripts/sync-check.sh` | modified | Added --sync flag, --help, initial sync for missing global dir |
 | `CHANGELOG.md` | created | Documents planned features |
 | `plan/unified-command-implementation.md` | created | Full implementation plan |
 
 ### Current State
 
-**Phase 1: INDEX.md Foundation** - COMPLETE
-**Phase 2: Unified Command Workflow** - COMPLETE
-**Phase 3: Fork Detection** - COMPLETE
-**Phase 4: Proactive Archive Suggestion** - COMPLETE (revised approach)
-- Dialectic review identified redundancy with existing "Proactive Advisory Triggers" section
-- Revised: integrated into existing sections instead of creating new section
-- Added "Work complete" trigger to When to Suggest table
-- Added archive suggestion template to What to Suggest
-- Enhanced "Work appears complete" with 5-item completion checklist
-- Added outcome capture step to Archive operation (ask user before archiving)
-- Local and global skill directories in sync
+**All phases complete.**
 
-**Remaining phases**:
-- Phase 5: format-check.py INDEX Validation (6 tasks)
+| Phase | Status |
+|-------|--------|
+| 1. INDEX.md Foundation | ✓ Complete |
+| 2. Unified Command Workflow | ✓ Complete |
+| 3. Fork Detection | ✓ Complete |
+| 4. Proactive Archive Suggestion | ✓ Complete |
+| 5. format-check.py INDEX Validation | ✓ Complete |
 
 ### Next Actions
 
-1. **Phase 5.1**: Add `is_index()` function to detect INDEX.md files
-2. **Phase 5.2**: Add `validate_index()` function for INDEX-specific validation
-3. **Phase 5.3**: Check for quick reference table with correct headers
-4. **Phase 5.4**: Check for summary sections matching table entries
-5. **Phase 5.5**: Update `main()` to detect file type and route to correct validator
-6. **Phase 5.6**: Test validation with sample INDEX.md
+None - implementation complete.
 
 ## User Rules
 
@@ -164,3 +155,31 @@ Revised approach: enhance existing sections (DRY principle).
 | Item | Before | After |
 |------|--------|-------|
 | Phase 4: Proactive Archive Suggestion | pending | complete |
+
+---
+
+## Delta: 2025-12-20T20:48:00Z
+
+### What Changed
+
+Completed Phase 5: Added INDEX.md validation to format-check.py with file type detection, table parsing, summary section validation, and date format checking.
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/format-check.py` | modified | +130 lines: is_index(), validate_index(), table/section parsing |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase 5: format-check.py INDEX Validation | pending | complete |
+
+---
+
+## Completion
+
+- **Status**: Archived
+- **Outcome**: Successfully implemented all 5 phases of the unified-command enhancement plan. The coihuin-compress skill now supports INDEX.md for checkpoint inventory, unified command entry point with intelligent operation selection, fork detection for parallel work streams, proactive archive suggestions, and INDEX.md format validation.
+- **Date**: 2025-12-20T20:48:00Z

@@ -6,12 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.2.0] - 2025-12-20
+
 ### Fixed
 
-- **Re-incorporate INDEX integration** - Lost during global/local skill sync
-  - INDEX maintenance instructions were in global skill but not local project
-  - Local sync overwrote global, losing the feature
-  - Need to add INDEX workflow back to SKILL.md
+- **Re-incorporated INDEX integration** - Lost during global/local skill sync
+  - Added INDEX maintenance instructions back to SKILL.md
+  - Created `index-format.md` specification
+  - Added INDEX.md validation to `format-check.py`
 
 ### Added
 
@@ -29,6 +33,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Proactive archive suggestion** - Skill suggests archiving when work complete
   - Explicit: User says "archive this"
   - Proactive: Skill notices work appears done, asks to confirm archive
+  - Captures outcome before archiving
+
+- **INDEX.md validation in format-check.py** - Validates INDEX files
+  - Detects file type automatically (checkpoint vs INDEX)
+  - Validates table headers, date formats, summary sections
+  - Checks for matching entries between table and sections
 
 ### Rationale
 
