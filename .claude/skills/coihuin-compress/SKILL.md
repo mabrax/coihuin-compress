@@ -42,6 +42,9 @@ Create new state snapshot from scratch.
 3. Generate checkpoint following the format
 4. Save to `checkpoints/active/<name>.md`
 5. Validate: `uv run format-check.py <file>`
+6. Update `checkpoints/active/INDEX.md`:
+   - Add row to Quick Reference Table
+   - Add Summary Section (see `index-format.md`)
 
 ### Delta
 
@@ -61,6 +64,9 @@ Update an existing checkpoint with changes from the current session.
    - **Next Actions**: Replace entirely
 3. Optionally add inline delta markers for visibility
 4. Output updated checkpoint for user to save
+5. Update `checkpoints/active/INDEX.md`:
+   - Update Last Updated date in table
+   - Update Status in Summary Section if changed
 
 > **Note**: Git tracks checkpoint file history, so separate delta artifacts are unnecessary. The checkpoint itself evolves, with Git providing the audit trail of changes.
 
@@ -81,7 +87,10 @@ Mark checkpoint as complete and move to historical storage.
    - **Date**: [ISO-8601 timestamp]
    ```
 2. Move from `checkpoints/active/` to `checkpoints/archive/`
-3. Git history provides the audit trail of checkpoint evolution
+3. Update `checkpoints/active/INDEX.md`:
+   - Remove row from Quick Reference Table
+   - Remove Summary Section
+4. Git history provides the audit trail of checkpoint evolution
 
 **Archive Limitations**: Archived checkpoints are historical snapshots, not live state:
 - File references may be outdated (files moved, renamed, deleted)
@@ -131,6 +140,7 @@ Adapt the suggestion to session state:
 ```
 checkpoints/
 ├── active/                    # Currently loaded into context
+│   ├── INDEX.md               # Quick inventory of active checkpoints
 │   └── chk-feature-name.md    # One per active feature/epic
 └── archive/                   # Historical, not loaded
     ├── .archive-marker        # Marker: ignore for context purposes
@@ -143,6 +153,7 @@ checkpoints/
 | File | Purpose |
 |------|---------|
 | `checkpoint-format.md` | Checkpoint and delta structure specification |
+| `index-format.md` | INDEX.md structure specification |
 | `examples/checkpoint.md` | Initial checkpoint example (no deltas yet) |
 | `examples/checkpoint-with-delta.md` | Checkpoint with deltas example (shows accumulation) |
 | `format-check.py` | Format validation script |
