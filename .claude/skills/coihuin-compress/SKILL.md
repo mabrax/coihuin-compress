@@ -26,6 +26,76 @@ Done:
 
 **Key principle**: User controls the flow. Load checkpoint manually, then tell the skill what to do.
 
+## Unified Command
+
+A single entry point that intelligently routes to the appropriate operation based on context.
+
+### Trigger Phrases
+
+| Phrase | Effect |
+|--------|--------|
+| "use compress skill" | Unified command - auto-detect operation |
+| "compress" | Unified command - auto-detect operation |
+| "compress skill" | Unified command - auto-detect operation |
+
+### Decision Tree
+
+When the unified command is invoked, evaluate context and route:
+
+```
+Is a checkpoint loaded in context?
+├─ NO → Suggest: Create new checkpoint
+│       "No checkpoint is loaded. Would you like me to create one for the current work?"
+│
+└─ YES → Has significant work been done since loading?
+         ├─ NO → Inform: Nothing to update
+         │       "The checkpoint is loaded but no significant changes detected yet."
+         │
+         └─ YES → Does work appear complete?
+                  ├─ YES → Suggest: Archive
+                  │       "Work appears complete. Would you like to archive this checkpoint?"
+                  │
+                  └─ NO → Is work diverging into unrelated streams?
+                          ├─ YES → Suggest: Fork (see Fork Detection)
+                          │       "Work seems to be diverging. Should we create a separate checkpoint?"
+                          │
+                          └─ NO → Suggest: Delta
+                                  "You've made progress. Would you like me to update the checkpoint with a delta?"
+```
+
+### Context Detection
+
+**"Checkpoint loaded"** means:
+- User attached a checkpoint file to the conversation (via `@` notation or file read)
+- The checkpoint content is visible in the current context
+- Detection: Look for checkpoint frontmatter (`---\ncheckpoint: <name>\n...`) in recent context
+
+**"Significant work"** means any of:
+- 2+ files modified or created
+- A decision was made and discussed
+- A task from Next Actions was completed
+- User explicitly says work was done
+
+**"Work appears complete"** means:
+- All items in Next Actions are done
+- User says "done", "finished", "complete", or similar
+- No pending blockers remain
+
+**"Work diverging"** means:
+- See Fork Detection section (Phase 3)
+
+### Backward Compatibility
+
+Explicit commands still work and take precedence:
+
+| Command | Effect |
+|---------|--------|
+| "checkpoint", "create checkpoint" | Always creates new checkpoint |
+| "delta", "update checkpoint" | Always updates existing checkpoint |
+| "archive", "archive checkpoint" | Always archives checkpoint |
+
+The unified command is a convenience—it doesn't replace explicit operations. Users who prefer direct control can continue using specific commands.
+
 ## Operations
 
 ### Checkpoint

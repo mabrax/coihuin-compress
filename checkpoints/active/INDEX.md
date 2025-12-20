@@ -12,4 +12,4 @@
 
 **Scope**: `.claude/skills/coihuin-compress/`, `scripts/sync-check.sh`, `plan/`
 
-**Status**: Phase 1 complete. Next: Phase 2 (Unified Command Workflow).
+**Status**: Phase 2 complete. Next: Phase 3 (Fork Detection).
