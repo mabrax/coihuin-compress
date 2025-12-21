@@ -2,7 +2,7 @@
 checkpoint: chk-checkpoint-branches-plan
 created: 2025-12-21T15:38:16Z
 anchor: Phase 1 complete
-last_delta: 2025-12-21T16:07:18Z
+last_delta: 2025-12-21T16:14:03Z
 ---
 
 ## Problem
@@ -66,32 +66,26 @@ Design and plan implementation of checkpoint branches with:
 | `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Added `parent` field: table row, YAML example, semantics section, version 1.2.0 |
 | `.claude/skills/coihuin-compress/format-check.py` | modified | Added `parent` to optional fields list (line 50) |
 | `.claude/skills/coihuin-compress/compress-tree.py` | created | Tree visualization CLI: scans checkpoints, builds lineage tree, renders ASCII output |
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Fork workflow updated: Option A uses parent, Branch Lineage section, compress-tree.py in Reference Files |
 
 ### Current State
 
-**Phase 3 complete.** The tree visualization CLI is fully functional:
-- Created `.claude/skills/coihuin-compress/compress-tree.py` (~180 lines)
-- PEP 723 metadata: Python ≥3.10, PyYAML dependency
-- Scans `active/` and `archive/` directories for `chk-*.md` files
-- Builds parent-child tree from `parent` frontmatter field
-- Unicode symbols: `⦿` root, `○` active, `◉` archived
-- Tree connectors: `├──`, `└──`, `│` for hierarchy
-- Edge cases handled: empty dirs, orphan parents, invalid frontmatter
+**All 4 phases complete.** Checkpoint branching feature fully implemented:
 
-**Verified output**:
-```
-⦿ chk-parent (2025-12-20) [active]
-├── ○ chk-child-1 (2025-12-21) [active]
-│   └── ○ chk-grandchild (2025-12-21) [active]
-└── ○ chk-child-2 (2025-12-21) [active]
-```
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Format spec (`parent` field in checkpoint-format.md) | ✅ |
+| 2 | Validation (`parent` in format-check.py optional fields) | ✅ |
+| 3 | Tree CLI (`compress-tree.py` visualization script) | ✅ |
+| 4 | Workflow integration (`SKILL.md` fork workflow updated) | ✅ |
 
 ### Next Actions
 
 - [x] **Phase 1**: Update `checkpoint-format.md` - add `parent` field to spec
-- [x] **Phase 2**: Update `format-check.py` - add `parent` to optional fields (line 50)
+- [x] **Phase 2**: Update `format-check.py` - add `parent` to optional fields
 - [x] **Phase 3**: Create `compress-tree.py` - new CLI script (~180 lines)
-- [ ] **Phase 4**: Update `SKILL.md` - integrate parent auto-population in fork workflow
+- [x] **Phase 4**: Update `SKILL.md` - integrate parent auto-population in fork workflow
+- [ ] Archive this checkpoint (feature complete)
 
 ## User Rules
 
@@ -161,3 +155,33 @@ Completed Phase 3: Created the `compress-tree.py` CLI script for visualizing che
 |------|--------|-------|
 | Phase 3 | pending | complete |
 | Overall progress | 2/4 phases | 3/4 phases |
+
+---
+
+## Delta: 2025-12-21T16:14:03Z
+
+### What Changed
+
+Completed Phase 4: Updated `SKILL.md` to integrate parent auto-population in the fork workflow and document the tree visualization.
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/SKILL.md` | modified | Fork Option A uses `parent` field, added Branch Lineage section, checkpoint operation notes parent, compress-tree.py in Reference Files |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase 4 | pending | complete |
+| Overall progress | 3/4 phases | 4/4 phases (feature complete) |
+
+---
+
+## Completion
+
+- **Status**: Archived
+- **Outcome**: Added Git-like branching for checkpoints—parent field in frontmatter tracks lineage, new `compress-tree.py` CLI visualizes checkpoint hierarchy as ASCII tree, fork workflow auto-populates parent when creating child checkpoints.
+- **Learnings**: Start small with minimal implementation, test it, dogfood it, test the new version, dogfood again—converge iteratively. Resist over-engineering; this is a single-purpose tool. What we added is natural evolution, not feature creep.
+- **Date**: 2025-12-21T16:18:31Z

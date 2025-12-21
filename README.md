@@ -64,6 +64,7 @@ Talk to Claude Code. Invoke the skill explicitly:
 | Create checkpoint | "use compress skill to create checkpoint" |
 | Update checkpoint | "use compress skill to add delta" |
 | Finish & archive | "use compress skill to archive" |
+| View checkpoint tree | `uv run compress-tree.py` |
 
 The skill handles everything: format, naming, file location.
 
@@ -74,6 +75,7 @@ The skill handles everything: format, naming, file location.
 ├── SKILL.md               # Skill instructions (source of truth)
 ├── checkpoint-format.md   # Checkpoint specification
 ├── format-check.py        # Format validator
+├── compress-tree.py       # Tree visualization CLI
 └── examples/              # Reference checkpoints
 
 checkpoints/
@@ -94,6 +96,21 @@ The name comes from the [coihue](https://en.wikipedia.org/wiki/Nothofagus_dombey
 Built by [Felipe Valenzuela Beck](https://mabrax.ai) — Production AI Toolsmith.
 
 This skill exists because I got tired of re-explaining context to Claude after long sessions. Now I use it daily on every project.
+
+## Why Branching?
+
+Real work isn't linear. You're deep in authentication when a payment bug surfaces. Sometimes it's a quick fix—delta and move on. But sometimes that fix expands into its own work stream with its own decisions, its own artifacts.
+
+The original fork detection asked: archive current work, or expand scope? Neither fit. You don't want to archive incomplete work, and you don't want to pollute a focused checkpoint with unrelated context.
+
+Branching solves this: fork creates a child checkpoint with a `parent` reference. Both remain active. The tree visualization (`uv run compress-tree.py`) shows the lineage:
+
+```
+⦿ chk-auth-system (2025-12-20) [active]
+└── ○ chk-payment-fix (2025-12-21) [active]
+```
+
+One field, one script. Natural evolution, not feature creep.
 
 ## License
 

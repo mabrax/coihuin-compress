@@ -157,7 +157,8 @@ Detected: [describe the divergent work]
 
 Options:
   A) Create separate checkpoint for new work
-     → Archives current progress, starts fresh checkpoint for new scope
+     → Creates new checkpoint with `parent: <current-checkpoint-id>`
+     → Current checkpoint remains active (parallel development)
 
   B) Continue with current checkpoint
      → Expands scope to include new work (update Problem section)
@@ -176,6 +177,29 @@ Which would you prefer?
 - **Explain the signal**: Tell the user why you think work is diverging
 - **Low friction**: If user says "just continue", update the checkpoint scope rather than nagging
 
+### Branch Lineage
+
+When forking creates a new checkpoint, the system automatically:
+
+1. Sets the `parent` field to the current checkpoint's ID
+2. The parent checkpoint remains active (enables parallel development)
+3. Use `uv run compress-tree.py` to visualize the lineage
+
+Example: Forking from `chk-auth-system` to work on payments:
+```yaml
+---
+checkpoint: chk-payment-flow
+created: 2025-12-21T14:00:00Z
+parent: chk-auth-system
+---
+```
+
+This creates a branch visible in the checkpoint tree:
+```
+⦿ chk-auth-system (2025-12-20) [active]
+└── ○ chk-payment-flow (2025-12-21) [active]
+```
+
 ## Operations
 
 ### Checkpoint
@@ -190,6 +214,7 @@ Create new state snapshot from scratch.
 1. Read `checkpoint-format.md` for structure
 2. Extract "What Must Survive" from conversation
 3. Generate checkpoint following the format
+   - If forking from existing checkpoint, set `parent: <source-checkpoint-id>`
 4. Save to `checkpoints/active/<name>.md`
 5. Validate: `uv run format-check.py <file>`
 6. Update `checkpoints/active/INDEX.md`:
@@ -316,6 +341,7 @@ checkpoints/
 | `examples/checkpoint.md` | Initial checkpoint example (no deltas yet) |
 | `examples/checkpoint-with-delta.md` | Checkpoint with deltas example (shows accumulation) |
 | `format-check.py` | Format validation script |
+| `compress-tree.py` | Checkpoint tree visualization script |
 
 ## Priority Hierarchy (token pressure)
 

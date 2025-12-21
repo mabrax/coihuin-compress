@@ -8,6 +8,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Nothing yet.
 
+## [1.3.0] - 2025-12-21
+
+### Added
+
+- **Checkpoint branching** - Git-like parent-child relationships between checkpoints
+  - New `parent` field in checkpoint frontmatter tracks lineage
+  - Forking from a checkpoint automatically sets parent reference
+  - Parent checkpoint remains active (enables parallel development)
+
+- **Tree visualization CLI** - `compress-tree.py` renders checkpoint lineage as ASCII tree
+  - Unicode symbols: `⦿` root, `○` active, `◉` archived
+  - Scans both `active/` and `archive/` directories
+  - Shows checkpoint name, date, and status
+
+- **Fork workflow updated** - Option A now creates child checkpoint instead of archiving
+  - Fork creates new checkpoint with `parent: <source-checkpoint-id>`
+  - Both checkpoints remain active for parallel work streams
+
+### Rationale
+
+When working on multiple features from the same starting point, users need to "fork" into different lines of development without losing track of relationships. The original fork detection identified divergence but treated it as a binary choice: archive current work or expand scope. Neither captured the reality of parallel development.
+
+The branching model enables tracking cognitive lineage—where did this line of thought come from? The tree visualization (inspired by SourceTree) makes these relationships visible at a glance. Implementation stayed minimal: one field, one script, four edits to the skill. Natural evolution, not feature creep.
+
 ## [1.2.0] - 2025-12-20
 
 ### Fixed
