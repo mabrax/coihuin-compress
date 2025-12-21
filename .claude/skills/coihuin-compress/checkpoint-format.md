@@ -1,6 +1,6 @@
 # Checkpoint Format Specification
 
-Version: 1.1.0
+Version: 1.2.0
 
 ## Overview
 
@@ -20,6 +20,7 @@ A **checkpoint** is a point-in-time snapshot of work state optimized for token-e
 checkpoint: <id>
 created: <ISO-8601 timestamp>
 anchor: <reference to conversation point or phase>
+parent: <parent-checkpoint-id>  # optional, for forked checkpoints
 ---
 
 ## Problem
@@ -83,6 +84,17 @@ anchor: <reference to conversation point or phase>
 | `created` | Yes | ISO-8601 timestamp of checkpoint creation |
 | `anchor` | No | Reference to conversation turn or phase this summarizes up to |
 | `last_delta` | No | ISO-8601 timestamp of last delta operation |
+| `parent` | No | Checkpoint ID of the parent (for forked checkpoints) |
+
+### Parent Field Semantics
+
+The `parent` field establishes lineage between checkpoints:
+
+- **Root checkpoints**: No `parent` field - represent independent work streams
+- **Forked checkpoints**: `parent` contains the checkpoint ID from which this work diverged
+- **Multiple children**: A parent can have multiple children (parallel forks)
+
+Use `uv run compress-tree.py` to visualize checkpoint lineage.
 
 ### Body Sections
 
