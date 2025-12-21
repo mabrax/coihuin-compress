@@ -47,7 +47,7 @@ CHECKPOINT_RECOMMENDED_SUBSECTIONS = [
 ]
 
 CHECKPOINT_FRONTMATTER_REQUIRED = ["checkpoint", "created"]
-CHECKPOINT_FRONTMATTER_OPTIONAL = ["anchor", "last_delta"]
+CHECKPOINT_FRONTMATTER_OPTIONAL = ["anchor", "last_delta", "parent"]
 
 
 def extract_frontmatter(content: str) -> tuple[dict | None, str]:

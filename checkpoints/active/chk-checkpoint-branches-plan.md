@@ -2,7 +2,7 @@
 checkpoint: chk-checkpoint-branches-plan
 created: 2025-12-21T15:38:16Z
 anchor: Phase 1 complete
-last_delta: 2025-12-21T15:45:58Z
+last_delta: 2025-12-21T16:07:18Z
 ---
 
 ## Problem
@@ -64,28 +64,33 @@ Design and plan implementation of checkpoint branches with:
 | `~/.claude/plans/checkpoint-branches/03-phase-tree-cli.md` | created | compress-tree.py creation checklist |
 | `~/.claude/plans/checkpoint-branches/04-phase-workflow.md` | created | SKILL.md changes checklist |
 | `.claude/skills/coihuin-compress/checkpoint-format.md` | modified | Added `parent` field: table row, YAML example, semantics section, version 1.2.0 |
+| `.claude/skills/coihuin-compress/format-check.py` | modified | Added `parent` to optional fields list (line 50) |
+| `.claude/skills/coihuin-compress/compress-tree.py` | created | Tree visualization CLI: scans checkpoints, builds lineage tree, renders ASCII output |
 
 ### Current State
 
-**Phase 1 complete.** The checkpoint format specification now includes the `parent` field:
-- Version bumped: 1.1.0 → 1.2.0
-- Header Fields table: added `parent` row (line 87)
-- YAML example: shows `parent` with comment (line 23)
-- Parent Field Semantics: new subsection explaining root vs forked checkpoints (lines 89-97)
+**Phase 3 complete.** The tree visualization CLI is fully functional:
+- Created `.claude/skills/coihuin-compress/compress-tree.py` (~180 lines)
+- PEP 723 metadata: Python ≥3.10, PyYAML dependency
+- Scans `active/` and `archive/` directories for `chk-*.md` files
+- Builds parent-child tree from `parent` frontmatter field
+- Unicode symbols: `⦿` root, `○` active, `◉` archived
+- Tree connectors: `├──`, `└──`, `│` for hierarchy
+- Edge cases handled: empty dirs, orphan parents, invalid frontmatter
 
-**Expected tree output format**:
+**Verified output**:
 ```
-⦿ chk-auth-system (2025-12-15) [archived]
-├── ◉ chk-payment-flow (2025-12-18) [active]
-│   └── ○ chk-stripe-integration (2025-12-21) [active]
-└── ◉ chk-oauth-integration (2025-12-19) [active]
+⦿ chk-parent (2025-12-20) [active]
+├── ○ chk-child-1 (2025-12-21) [active]
+│   └── ○ chk-grandchild (2025-12-21) [active]
+└── ○ chk-child-2 (2025-12-21) [active]
 ```
 
 ### Next Actions
 
 - [x] **Phase 1**: Update `checkpoint-format.md` - add `parent` field to spec
-- [ ] **Phase 2**: Update `format-check.py` - add `parent` to optional fields (line 50)
-- [ ] **Phase 3**: Create `compress-tree.py` - new CLI script (~150 lines)
+- [x] **Phase 2**: Update `format-check.py` - add `parent` to optional fields (line 50)
+- [x] **Phase 3**: Create `compress-tree.py` - new CLI script (~180 lines)
 - [ ] **Phase 4**: Update `SKILL.md` - integrate parent auto-population in fork workflow
 
 ## User Rules
@@ -114,3 +119,45 @@ Completed Phase 1: Updated checkpoint-format.md to include the `parent` field fo
 |------|--------|-------|
 | Phase 1 | pending | complete |
 | Overall progress | 0/4 phases | 1/4 phases |
+
+---
+
+## Delta: 2025-12-21T16:01:01Z
+
+### What Changed
+
+Completed Phase 2: Updated format-check.py to accept the `parent` field as an optional frontmatter field.
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/format-check.py` | modified | Line 50: added `parent` to `CHECKPOINT_FRONTMATTER_OPTIONAL` list |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase 2 | pending | complete |
+| Overall progress | 1/4 phases | 2/4 phases |
+
+---
+
+## Delta: 2025-12-21T16:07:18Z
+
+### What Changed
+
+Completed Phase 3: Created the `compress-tree.py` CLI script for visualizing checkpoint lineage as an ASCII tree.
+
+### Artifacts
+
+| File | Action | Description |
+|------|--------|-------------|
+| `.claude/skills/coihuin-compress/compress-tree.py` | created | Tree visualization CLI (~180 lines): scans checkpoints, builds parent-child tree, renders ASCII output with Unicode symbols |
+
+### Status Transitions
+
+| Item | Before | After |
+|------|--------|-------|
+| Phase 3 | pending | complete |
+| Overall progress | 2/4 phases | 3/4 phases |
