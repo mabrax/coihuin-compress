@@ -1,8 +1,8 @@
 # Coihuin Compress
 
-A **Claude Code skill** for proactive context compression in long coding sessions.
+Proactive context compression for long coding sessions.
 
-> **This is a skill, not a standalone tool.** Copy `.claude/skills/coihuin-compress/` to your project and it just works.
+> **Two ways to use it:** As a Claude Code skill (conversational) or via CLI (direct commands).
 
 ## The Problem
 
@@ -49,40 +49,67 @@ Based on [Factory.ai's research](https://factory.ai/news/compressing-context):
 
 ## Installation
 
+### Skill (Claude Code)
+
 ```bash
 cp -r .claude/skills/coihuin-compress /path/to/your/project/.claude/skills/
 ```
 
 Claude Code discovers and uses the skill automatically.
 
+### CLI
+
+```bash
+uv pip install -e .
+# or run directly
+uv run chkcc --help
+```
+
 ## Usage
 
-Talk to Claude Code. Invoke the skill explicitly:
+### Via Skill (conversational)
+
+Talk to Claude Code naturally:
 
 | Action | Say |
 |--------|-----|
 | Create checkpoint | "use compress skill to create checkpoint" |
 | Update checkpoint | "use compress skill to add delta" |
 | Finish & archive | "use compress skill to archive" |
-| View checkpoint tree | `uv run compress-tree.py` |
-| View only active | `uv run compress-tree.py -s active` |
-| View only archived | `uv run compress-tree.py -s archive` |
 
-The skill handles everything: format, naming, file location.
+The skill handles format, naming, and file location.
+
+### Via CLI (direct commands)
+
+| Action | Command |
+|--------|---------|
+| View checkpoint tree | `chkcc tree` |
+| View only active | `chkcc tree -s active` |
+| View only archived | `chkcc tree -s archive` |
+| Validate format | `chkcc validate <file>` |
+| Create checkpoint | `chkcc scaffold checkpoint <name>` |
+| Add delta | `chkcc scaffold delta <file>` |
+| Archive checkpoint | `chkcc archive <file>` |
 
 ## Project Structure
 
 ```
 .claude/skills/coihuin-compress/
-├── SKILL.md               # Skill instructions (source of truth)
+├── SKILL.md               # Skill instructions
 ├── checkpoint-format.md   # Checkpoint specification
-├── format-check.py        # Format validator
-├── compress-tree.py       # Tree visualization CLI
+├── compress-tree.py       # Standalone tree script
 └── examples/              # Reference checkpoints
+
+src/chkcc/                 # CLI package
+├── cli.py                 # Entry point
+├── tree.py                # Tree visualization
+├── validate.py            # Format validation
+├── scaffold.py            # Checkpoint/delta creation
+└── archive.py             # Archive functionality
 
 checkpoints/
 ├── active/                # Work in progress
-└── archive/               # Completed (.archive-marker)
+└── archive/               # Completed
 ```
 
 ## Background
@@ -105,7 +132,7 @@ Real work isn't linear. You're deep in authentication when a payment bug surface
 
 The original fork detection asked: archive current work, or expand scope? Neither fit. You don't want to archive incomplete work, and you don't want to pollute a focused checkpoint with unrelated context.
 
-Branching solves this: fork creates a child checkpoint with a `parent` reference. Both remain active. The tree visualization (`uv run compress-tree.py`) shows the lineage:
+Branching solves this: fork creates a child checkpoint with a `parent` reference. Both remain active. The tree visualization (`chkcc tree`) shows the lineage:
 
 ```
 ⦿ chk-auth-system (2025-12-20) [active]

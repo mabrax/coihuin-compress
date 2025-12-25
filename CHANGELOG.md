@@ -6,12 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.4.0] - 2025-12-25
+
 ### Added
+
+- **CLI package (`chkcc`)** - Direct command-line interface for checkpoint management
+  - `chkcc tree` - Visualize checkpoint lineage
+  - `chkcc validate <file>` - Check checkpoint format
+  - `chkcc scaffold checkpoint <name>` - Create new checkpoint
+  - `chkcc scaffold delta <file>` - Add delta to checkpoint
+  - `chkcc archive <file>` - Archive completed checkpoint
 
 - **Tree status filter** - Filter tree view by checkpoint status
   - `-s active` / `--status active` shows only active checkpoints
   - `-s archive` / `--status archive` shows only archived checkpoints
-  - `-s all` / `--status all` shows all (default, unchanged behavior)
+  - `-s all` / `--status all` shows all (default)
+
+### Rationale
+
+The skill works great for conversational workflows, but power users and scripts need direct access. The CLI provides the same functionality without requiring Claude Code—useful for automation, CI/CD, or quick terminal checks. Both interfaces coexist: skill for natural interaction, CLI for direct control.
 
 ## [1.3.0] - 2025-12-21
 
