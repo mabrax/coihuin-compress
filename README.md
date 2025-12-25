@@ -65,6 +65,8 @@ Talk to Claude Code. Invoke the skill explicitly:
 | Update checkpoint | "use compress skill to add delta" |
 | Finish & archive | "use compress skill to archive" |
 | View checkpoint tree | `uv run compress-tree.py` |
+| View only active | `uv run compress-tree.py -s active` |
+| View only archived | `uv run compress-tree.py -s archive` |
 
 The skill handles everything: format, naming, file location.
 

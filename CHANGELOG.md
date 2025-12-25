@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Tree status filter** - Filter tree view by checkpoint status
+  - `-s active` / `--status active` shows only active checkpoints
+  - `-s archive` / `--status archive` shows only archived checkpoints
+  - `-s all` / `--status all` shows all (default, unchanged behavior)
 
 ## [1.3.0] - 2025-12-21
 

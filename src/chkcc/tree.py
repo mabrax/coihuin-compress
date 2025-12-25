@@ -1,40 +1,23 @@
-#!/usr/bin/env python3
-# /// script
-# requires-python = ">=3.10"
-# dependencies = [
-#     "pyyaml>=6.0",
-# ]
-# ///
 """
 Checkpoint lineage tree visualizer for coihuin-compress.
 
 Displays checkpoint parent-child relationships as an ASCII tree.
 
-Usage:
-    uv run compress-tree.py [options] [checkpoints-dir]
-
-Options:
-    -s, --status STATUS  Filter by status: active, archive, or all (default: all)
-
-Examples:
-    uv run compress-tree.py                    # Uses ./checkpoints/, shows all
-    uv run compress-tree.py -s active          # Only active checkpoints
-    uv run compress-tree.py -s archive         # Only archived checkpoints
-    uv run compress-tree.py --status active    # Long form
+This module provides library functions for tree visualization. For CLI usage,
+use the chkcc command line tool.
 """
 
-import argparse
-import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-import yaml
+from chkcc.validate import extract_frontmatter, parse_iso_datetime
 
 
 @dataclass
 class Checkpoint:
     """Represents a checkpoint with its metadata."""
+
     id: str
     created: datetime | None
     parent: str | None
@@ -42,41 +25,15 @@ class Checkpoint:
     path: Path
 
 
-def extract_frontmatter(content: str) -> dict | None:
-    """Extract YAML frontmatter from markdown content."""
-    if not content.startswith("---"):
-        return None
-
-    parts = content.split("---", 2)
-    if len(parts) < 3:
-        return None
-
-    try:
-        return yaml.safe_load(parts[1])
-    except yaml.YAMLError:
-        return None
-
-
-def parse_iso_datetime(date_str: str | datetime | None) -> datetime | None:
-    """Parse ISO 8601 datetime string (e.g., 2025-12-17T10:30:00Z)."""
-    if date_str is None:
-        return None
-    if isinstance(date_str, datetime):
-        return date_str
-    try:
-        # Handle both 'Z' and '+00:00' timezone formats
-        date_str = str(date_str).replace("Z", "+00:00")
-        return datetime.fromisoformat(date_str)
-    except (ValueError, TypeError):
-        return None
-
-
 def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpoint]:
     """Scan checkpoint directories and return list of Checkpoint objects.
 
     Args:
-        base_dir: Base checkpoints directory
+        base_dir: Path to checkpoints directory (should contain active/ and archive/)
         status_filter: Filter by status - 'active', 'archive', or 'all'
+
+    Returns:
+        List of Checkpoint objects found in the directory
     """
     checkpoints = []
 
@@ -95,7 +52,8 @@ def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpo
 
         for file_path in dir_path.glob("chk-*.md"):
             content = file_path.read_text()
-            frontmatter = extract_frontmatter(content)
+            # extract_frontmatter returns (dict | None, body_str)
+            frontmatter, _ = extract_frontmatter(content)
 
             if frontmatter is None or "checkpoint" not in frontmatter:
                 continue
@@ -113,7 +71,15 @@ def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpo
 
 
 def build_tree(checkpoints: list[Checkpoint]) -> dict[str | None, list[Checkpoint]]:
-    """Build tree structure: parent_id -> list of children."""
+    """Build tree structure: parent_id -> list of children.
+
+    Args:
+        checkpoints: List of Checkpoint objects
+
+    Returns:
+        Dictionary mapping parent_id to list of child Checkpoints.
+        Key of None represents root nodes (no parent or parent not found).
+    """
     # Create lookup for validation
     checkpoint_ids = {cp.id for cp in checkpoints}
 
@@ -135,7 +101,14 @@ def build_tree(checkpoints: list[Checkpoint]) -> dict[str | None, list[Checkpoin
 
 
 def format_date(dt: datetime | None) -> str:
-    """Format datetime as YYYY-MM-DD or 'unknown'."""
+    """Format datetime as YYYY-MM-DD or 'unknown'.
+
+    Args:
+        dt: datetime object or None
+
+    Returns:
+        Formatted date string or 'unknown'
+    """
     if dt is None:
         return "unknown"
     return dt.strftime("%Y-%m-%d")
@@ -148,7 +121,18 @@ def render_tree(
     prefix: str = "",
     is_last: bool = True,
 ) -> list[str]:
-    """Render tree as ASCII art lines."""
+    """Render tree as ASCII art lines.
+
+    Args:
+        tree: Tree structure from build_tree()
+        checkpoints_by_id: Lookup dictionary of checkpoint id -> Checkpoint
+        node_id: Starting node id (None for roots)
+        prefix: Current line prefix for indentation
+        is_last: Whether this is the last sibling
+
+    Returns:
+        List of formatted lines representing the tree
+    """
     lines = []
 
     if node_id is None:
@@ -158,8 +142,7 @@ def render_tree(
             is_last_root = i == len(roots) - 1
 
             # Root symbol and info
-            symbol = "◉" if root.status == "archived" else "○"
-            root_symbol = "⦿"  # Root marker
+            root_symbol = "\u29bf"  # Root marker
             date_str = format_date(root.created)
             lines.append(f"{root_symbol} {root.id} ({date_str}) [{root.status}]")
 
@@ -185,21 +168,31 @@ def render_subtree(
     prefix: str,
     is_last: bool,
 ) -> list[str]:
-    """Render a subtree starting from given node."""
+    """Render a subtree starting from given node.
+
+    Args:
+        tree: Tree structure from build_tree()
+        node: Checkpoint node to render
+        prefix: Current line prefix for indentation
+        is_last: Whether this is the last sibling
+
+    Returns:
+        List of formatted lines representing the subtree
+    """
     lines = []
 
     # Choose connector
-    connector = "└── " if is_last else "├── "
+    connector = "\u2514\u2500\u2500 " if is_last else "\u251c\u2500\u2500 "
 
     # Choose symbol based on status
-    symbol = "◉" if node.status == "archived" else "○"
+    symbol = "\u25c9" if node.status == "archived" else "\u25cb"
 
     # Format line
     date_str = format_date(node.created)
     lines.append(f"{prefix}{connector}{symbol} {node.id} ({date_str}) [{node.status}]")
 
     # Prepare prefix for children
-    child_prefix = prefix + ("    " if is_last else "│   ")
+    child_prefix = prefix + ("    " if is_last else "\u2502   ")
 
     # Render children
     children = tree.get(node.id, [])
@@ -210,45 +203,33 @@ def render_subtree(
     return lines
 
 
-def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Checkpoint lineage tree visualizer"
-    )
-    parser.add_argument(
-        "path",
-        nargs="?",
-        default="checkpoints",
-        help="Checkpoints directory (default: checkpoints)",
-    )
-    parser.add_argument(
-        "-s", "--status",
-        choices=["active", "archive", "all"],
-        default="all",
-        help="Filter by status (default: all)",
-    )
+def show_tree(base_dir: Path, status_filter: str = "all") -> list[str]:
+    """Show checkpoint tree for a directory.
 
-    args = parser.parse_args()
-    base_dir = Path(args.path)
+    Args:
+        base_dir: Path to checkpoints directory (should contain active/ and archive/)
+        status_filter: Filter by status - 'active', 'archive', or 'all'
 
-    # Validate directory
+    Returns:
+        List of lines representing the tree
+
+    Raises:
+        FileNotFoundError: If directory doesn't exist
+        NotADirectoryError: If path is not a directory
+    """
     if not base_dir.exists():
-        print(f"Error: Directory not found: {base_dir}")
-        sys.exit(1)
+        raise FileNotFoundError(f"Directory not found: {base_dir}")
 
     if not base_dir.is_dir():
-        print(f"Error: Not a directory: {base_dir}")
-        sys.exit(1)
+        raise NotADirectoryError(f"Not a directory: {base_dir}")
 
     # Scan checkpoints
-    checkpoints = scan_checkpoints(base_dir, args.status)
+    checkpoints = scan_checkpoints(base_dir, status_filter)
 
     if not checkpoints:
-        if args.status == "all":
-            print("No checkpoints found.")
-        else:
-            print(f"No {args.status} checkpoints found.")
-        sys.exit(0)
+        if status_filter == "all":
+            return ["No checkpoints found."]
+        return [f"No {status_filter} checkpoints found."]
 
     # Build lookup
     checkpoints_by_id = {cp.id: cp for cp in checkpoints}
@@ -257,10 +238,4 @@ def main():
     tree = build_tree(checkpoints)
     lines = render_tree(tree, checkpoints_by_id)
 
-    # Output
-    for line in lines:
-        print(line)
-
-
-if __name__ == "__main__":
-    main()
+    return lines
