@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from chkcc import archive, scaffold, tree, validate
+from chkcc import archive, current, scaffold, status, tree, validate
 
 
 def cmd_tree(args: argparse.Namespace) -> int:
@@ -27,6 +27,23 @@ def cmd_tree(args: argparse.Namespace) -> int:
         print(f"Error: {e}", file=sys.stderr)
         return 1
     except NotADirectoryError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    """Handle 'status' subcommand."""
+    try:
+        base_dir = Path(args.dir).expanduser().resolve()
+        status.cmd_status(base_dir, args.all)
+        return 0
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except NotADirectoryError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
@@ -64,6 +81,7 @@ def cmd_scaffold_checkpoint(args: argparse.Namespace) -> int:
             parent=args.parent,
             anchor=args.anchor,
             output_dir=output_dir,
+            set_current=args.current,
         )
         print(f"Created checkpoint: {created_path}")
         return 0
@@ -97,7 +115,7 @@ def cmd_archive(args: argparse.Namespace) -> int:
     """Handle 'archive' subcommand."""
     try:
         checkpoint_path = Path(args.file).expanduser().resolve()
-        archived_path = archive.archive_checkpoint(checkpoint_path)
+        archived_path = archive.archive_checkpoint(checkpoint_path, force=args.force)
         print(f"Archived checkpoint: {archived_path}")
         return 0
     except FileNotFoundError as e:
@@ -108,6 +126,43 @@ def cmd_archive(args: argparse.Namespace) -> int:
         return 1
     except (PermissionError, OSError) as e:
         print(f"Error: Unable to archive checkpoint: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_current(args: argparse.Namespace) -> int:
+    """Handle 'current' subcommand."""
+    try:
+        base_dir = Path(args.dir).expanduser().resolve()
+
+        # Resolve checkpoint path if provided
+        checkpoint_path = None
+        if args.checkpoint:
+            # If just a filename, resolve relative to active/ directory
+            checkpoint_input = Path(args.checkpoint)
+            if not checkpoint_input.is_absolute():
+                # Check if it's just a filename or a relative path
+                if checkpoint_input.parent == Path("."):
+                    # Just a filename - look in active/ directory
+                    checkpoint_path = base_dir / "active" / checkpoint_input
+                    # Add .md extension if not present
+                    if not checkpoint_path.suffix:
+                        checkpoint_path = checkpoint_path.with_suffix(".md")
+                else:
+                    # Relative path - resolve from current directory
+                    checkpoint_path = checkpoint_input.expanduser().resolve()
+            else:
+                checkpoint_path = checkpoint_input.expanduser().resolve()
+
+        current.cmd_current(base_dir, checkpoint_path, args.clear)
+        return 0
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except (PermissionError, OSError) as e:
+        print(f"Error: Unable to update checkpoint: {e}", file=sys.stderr)
         return 1
 
 
@@ -139,6 +194,24 @@ def main() -> None:
             help="Filter by status (default: all)",
         )
         tree_parser.set_defaults(func=cmd_tree)
+
+        # status command
+        status_parser = subparsers.add_parser(
+            "status",
+            help="Show checkpoint status summaries with context and next actions",
+        )
+        status_parser.add_argument(
+            "dir",
+            nargs="?",
+            default="./checkpoints",
+            help="Checkpoints directory (default: ./checkpoints)",
+        )
+        status_parser.add_argument(
+            "-a", "--all",
+            action="store_true",
+            help="Include archived checkpoints",
+        )
+        status_parser.set_defaults(func=cmd_status)
 
         # validate command
         validate_parser = subparsers.add_parser(
@@ -181,6 +254,11 @@ def main() -> None:
             help="Anchor reference (branch, commit, PR, etc.)",
         )
         scaffold_checkpoint_parser.add_argument(
+            "--current",
+            action="store_true",
+            help="Set this checkpoint as current (status: current)",
+        )
+        scaffold_checkpoint_parser.add_argument(
             "--dir",
             default="./checkpoints/active",
             help="Output directory (default: ./checkpoints/active)",
@@ -207,7 +285,35 @@ def main() -> None:
             "file",
             help="Path to checkpoint file",
         )
+        archive_parser.add_argument(
+            "-f", "--force",
+            action="store_true",
+            help="Force archive even if checkpoint has active children",
+        )
         archive_parser.set_defaults(func=cmd_archive)
+
+        # current command
+        current_parser = subparsers.add_parser(
+            "current",
+            help="Show or set the current checkpoint",
+        )
+        current_parser.add_argument(
+            "checkpoint",
+            nargs="?",
+            default=None,
+            help="Checkpoint to set as current (filename or path)",
+        )
+        current_parser.add_argument(
+            "-c", "--clear",
+            action="store_true",
+            help="Clear current checkpoint marker",
+        )
+        current_parser.add_argument(
+            "--dir",
+            default="./checkpoints",
+            help="Checkpoints directory (default: ./checkpoints)",
+        )
+        current_parser.set_defaults(func=cmd_current)
 
         # Parse arguments
         args = parser.parse_args()

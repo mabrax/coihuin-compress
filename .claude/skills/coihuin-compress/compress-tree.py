@@ -38,7 +38,7 @@ class Checkpoint:
     id: str
     created: datetime | None
     parent: str | None
-    status: str  # 'active' or 'archived'
+    status: str  # Display status: 'active', 'current', or 'archived' (derived from location)
     path: Path
 
 

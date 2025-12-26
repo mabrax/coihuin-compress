@@ -8,6 +8,8 @@ templates, enabling quick creation of properly structured checkpoint files.
 from datetime import datetime, timezone
 from pathlib import Path
 
+from chkcc import current
+
 
 def get_timestamp() -> str:
     """Get current UTC timestamp in ISO 8601 format.
@@ -40,6 +42,7 @@ def get_checkpoint_template(
         "---",
         f"checkpoint: {name}",
         f"created: {timestamp}",
+        "status: active",
     ]
     if anchor:
         frontmatter_lines.append(f"anchor: {anchor}")
@@ -146,6 +149,7 @@ def scaffold_checkpoint(
     anchor: str | None = None,
     *,
     output_dir: Path,
+    set_current: bool = False,
 ) -> Path:
     """Create a new checkpoint file from template.
 
@@ -154,6 +158,8 @@ def scaffold_checkpoint(
         parent: Optional parent checkpoint name for branching
         anchor: Optional anchor reference (e.g., branch name, commit, PR)
         output_dir: Directory where checkpoint file will be created
+        set_current: If True, set this checkpoint as current (status: current)
+                     and clear any existing current checkpoint
 
     Returns:
         Path to the created checkpoint file
@@ -187,6 +193,18 @@ def scaffold_checkpoint(
 
     # Write the file with explicit encoding
     file_path.write_text(template, encoding="utf-8")
+
+    # Handle set_current flag
+    if set_current:
+        # Resolve base_dir from output_dir
+        # If output_dir is .../checkpoints/active, base_dir is .../checkpoints
+        base_dir = output_dir.parent
+
+        # Clear any existing current checkpoint first
+        current.clear_current(base_dir)
+
+        # Set the status to current in the file we just created
+        current.update_frontmatter_status(file_path, "current")
 
     return file_path
 

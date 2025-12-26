@@ -10,6 +10,27 @@ import re
 import shutil
 from pathlib import Path
 
+from chkcc.tree import Checkpoint, get_children, scan_checkpoints
+from chkcc.validate import extract_frontmatter
+
+
+def get_active_children(checkpoint_id: str, base_dir: Path) -> list[Checkpoint]:
+    """Find all active (non-archived) children of a checkpoint.
+
+    Args:
+        checkpoint_id: The checkpoint ID to find children for
+        base_dir: Base checkpoints directory (parent of active/ and archive/)
+
+    Returns:
+        List of Checkpoint objects that are children and in active/ directory
+    """
+    # Scan only active checkpoints for better performance
+    checkpoints = scan_checkpoints(base_dir, status_filter="active")
+
+    # Get children using helper from tree.py
+    # All returned checkpoints are already non-archived
+    return get_children(checkpoint_id, checkpoints)
+
 
 def has_completion_section(content: str) -> bool:
     """Check if checkpoint content has a ## Completion section."""
@@ -167,7 +188,7 @@ def update_index(index_path: Path, checkpoint_name: str) -> None:
     index_path.write_text(content)
 
 
-def archive_checkpoint(checkpoint_path: Path) -> Path:
+def archive_checkpoint(checkpoint_path: Path, force: bool = False) -> Path:
     """Archive a completed checkpoint.
 
     Moves a checkpoint from the active directory to the archive directory
@@ -175,6 +196,7 @@ def archive_checkpoint(checkpoint_path: Path) -> Path:
 
     Args:
         checkpoint_path: Path to the checkpoint file in active/ directory
+        force: If True, skip validation for active children
 
     Returns:
         Path to the archived checkpoint file
@@ -183,6 +205,7 @@ def archive_checkpoint(checkpoint_path: Path) -> Path:
         FileNotFoundError: If checkpoint file doesn't exist
         ValueError: If checkpoint lacks ## Completion section
         ValueError: If checkpoint is not in an active/ directory
+        ValueError: If checkpoint has active children (unless force=True)
     """
     # Validate checkpoint exists
     if not checkpoint_path.exists():
@@ -202,6 +225,26 @@ def archive_checkpoint(checkpoint_path: Path) -> Path:
             f"Checkpoint lacks required '## Completion' section. "
             f"Add a Completion section before archiving."
         )
+
+    # Check for active children (unless force=True)
+    if not force:
+        # Extract checkpoint ID from frontmatter
+        frontmatter, _ = extract_frontmatter(content)
+        checkpoint_id = frontmatter.get("checkpoint") if frontmatter else None
+
+        if checkpoint_id:
+            # Determine base_dir from checkpoint_path
+            # checkpoint_path is in active/, base_dir is parent of active/
+            base_dir = checkpoint_path.parent.parent
+
+            active_children = get_active_children(checkpoint_id, base_dir)
+            if active_children:
+                child_names = "\n".join([f"  - {cp.id} ({cp.display_status})" for cp in active_children])
+                raise ValueError(
+                    f"Cannot archive '{checkpoint_id}': has active children\n"
+                    f"{child_names}\n"
+                    f"Archive children first, or use --force to override."
+                )
 
     # Determine archive path (sibling to active/)
     active_dir = checkpoint_path.parent

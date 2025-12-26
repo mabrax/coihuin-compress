@@ -21,8 +21,21 @@ class Checkpoint:
     id: str
     created: datetime | None
     parent: str | None
-    status: str  # 'active' or 'archived'
     path: Path
+    status: str = "active"  # Frontmatter status: 'current' or 'active'
+    is_archived: bool = False  # True if checkpoint is in archive/ directory
+
+    @property
+    def display_status(self) -> str:
+        """Get the display status for tree rendering.
+
+        Returns:
+            'archived' if in archive directory (synthetic status, not from frontmatter),
+            otherwise frontmatter status ('current' or 'active')
+        """
+        if self.is_archived:
+            return "archived"
+        return self.status
 
 
 def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpoint]:
@@ -38,14 +51,15 @@ def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpo
     checkpoints = []
 
     # Determine which directories to scan based on filter
+    # Format: (subdir_name, is_archived)
     if status_filter == "active":
-        dirs_to_scan = [("active", "active")]
+        dirs_to_scan = [("active", False)]
     elif status_filter == "archive":
-        dirs_to_scan = [("archive", "archived")]
+        dirs_to_scan = [("archive", True)]
     else:  # 'all'
-        dirs_to_scan = [("active", "active"), ("archive", "archived")]
+        dirs_to_scan = [("active", False), ("archive", True)]
 
-    for subdir, status in dirs_to_scan:
+    for subdir, is_archived in dirs_to_scan:
         dir_path = base_dir / subdir
         if not dir_path.exists():
             continue
@@ -58,14 +72,40 @@ def scan_checkpoints(base_dir: Path, status_filter: str = "all") -> list[Checkpo
             if frontmatter is None or "checkpoint" not in frontmatter:
                 continue
 
+            # Extract status from frontmatter, default to 'active' for backward compat
+            frontmatter_status = frontmatter.get("status", "active")
+
+            # Validate status value per checkpoint-format.md spec
+            if frontmatter_status not in ("current", "active"):
+                import sys
+                print(f"Warning: Invalid status '{frontmatter_status}' in {file_path}, defaulting to 'active'",
+                      file=sys.stderr)
+                frontmatter_status = "active"
+
             checkpoint = Checkpoint(
                 id=frontmatter["checkpoint"],
                 created=parse_iso_datetime(frontmatter.get("created")),
                 parent=frontmatter.get("parent"),
-                status=status,
                 path=file_path,
+                status=frontmatter_status,
+                is_archived=is_archived,
             )
             checkpoints.append(checkpoint)
+
+    # Validate: Only one active checkpoint should have status 'current'
+    current_checkpoints = [
+        cp for cp in checkpoints
+        if not cp.is_archived and cp.status == "current"
+    ]
+    if len(current_checkpoints) > 1:
+        import sys
+        print(
+            f"Warning: Found {len(current_checkpoints)} checkpoints with status 'current', "
+            f"expected at most 1:",
+            file=sys.stderr
+        )
+        for cp in current_checkpoints:
+            print(f"  - {cp.id} ({cp.path})", file=sys.stderr)
 
     return checkpoints
 
@@ -98,6 +138,24 @@ def build_tree(checkpoints: list[Checkpoint]) -> dict[str | None, list[Checkpoin
         children.sort(key=lambda c: c.created or datetime.min)
 
     return tree
+
+
+def get_children(checkpoint_id: str, checkpoints: list[Checkpoint]) -> list[Checkpoint]:
+    """Return all checkpoints that have this checkpoint_id as their parent.
+
+    Used by archive validation to check for active children before archiving.
+
+    Args:
+        checkpoint_id: The checkpoint ID to find children for
+        checkpoints: List of Checkpoint objects to search
+
+    Returns:
+        List of Checkpoints that have checkpoint_id as their parent,
+        sorted by creation date (oldest first)
+    """
+    children = [cp for cp in checkpoints if cp.parent == checkpoint_id]
+    children.sort(key=lambda c: c.created or datetime.min)
+    return children
 
 
 def format_date(dt: datetime | None) -> str:
@@ -144,7 +202,7 @@ def render_tree(
             # Root symbol and info
             root_symbol = "\u29bf"  # Root marker
             date_str = format_date(root.created)
-            lines.append(f"{root_symbol} {root.id} ({date_str}) [{root.status}]")
+            lines.append(f"{root_symbol} {root.id} ({date_str}) [{root.display_status}]")
 
             # Render children
             children = tree.get(root.id, [])
@@ -184,12 +242,13 @@ def render_subtree(
     # Choose connector
     connector = "\u2514\u2500\u2500 " if is_last else "\u251c\u2500\u2500 "
 
-    # Choose symbol based on status
-    symbol = "\u25c9" if node.status == "archived" else "\u25cb"
+    # Choose symbol based on display status
+    display_status = node.display_status
+    symbol = "\u25c9" if display_status == "archived" else "\u25cb"
 
     # Format line
     date_str = format_date(node.created)
-    lines.append(f"{prefix}{connector}{symbol} {node.id} ({date_str}) [{node.status}]")
+    lines.append(f"{prefix}{connector}{symbol} {node.id} ({date_str}) [{display_status}]")
 
     # Prepare prefix for children
     child_prefix = prefix + ("    " if is_last else "\u2502   ")

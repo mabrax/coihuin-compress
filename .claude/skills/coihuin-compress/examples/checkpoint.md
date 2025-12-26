@@ -2,6 +2,7 @@
 checkpoint: auth-phase-complete
 created: 2025-12-14T18:30:00Z
 anchor: end-of-phase-2
+status: active
 ---
 
 ## Problem

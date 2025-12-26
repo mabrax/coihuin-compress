@@ -1,6 +1,6 @@
 # Checkpoint Format Specification
 
-Version: 1.2.0
+Version: 1.3.0
 
 ## Overview
 
@@ -21,6 +21,7 @@ checkpoint: <id>
 created: <ISO-8601 timestamp>
 anchor: <reference to conversation point or phase>
 parent: <parent-checkpoint-id>  # optional, for forked checkpoints
+status: <current|active>  # optional, defaults to 'active' if omitted
 ---
 
 ## Problem
@@ -85,6 +86,24 @@ parent: <parent-checkpoint-id>  # optional, for forked checkpoints
 | `anchor` | No | Reference to conversation turn or phase this summarizes up to |
 | `last_delta` | No | ISO-8601 timestamp of last delta operation |
 | `parent` | No | Checkpoint ID of the parent (for forked checkpoints) |
+| `status` | No | Checkpoint status: `current` (immediate focus) or `active` (in-progress). Defaults to `active` if omitted. |
+
+### Status Field Semantics
+
+The `status` field indicates the operational state of a checkpoint:
+
+- **`current`**: Exactly ONE checkpoint should have this status—it represents the checkpoint that is the immediate focus of work
+- **`active`**: The checkpoint is in progress but not the immediate focus of work
+- **Default behavior**: If the `status` field is omitted, the checkpoint is treated as `active` (backward compatible with existing checkpoints)
+- **Archived checkpoints**: The `status` field only applies to checkpoints in the `active/` directory. Once archived (moved to `archive/` with a `## Completion` section), the `status` field is ignored—location determines archived state.
+
+Note: Only one checkpoint should be marked as `current` in an active work session. When moving to a different checkpoint, update the old one from `current` to `active`.
+
+### Validation Rules
+
+1. Only one checkpoint in `active/` should have `status: current` at a time
+2. Tools should warn if multiple `current` checkpoints are detected
+3. Setting a new checkpoint as `current` should first clear the existing `current`
 
 ### Parent Field Semantics
 

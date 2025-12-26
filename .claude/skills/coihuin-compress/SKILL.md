@@ -14,17 +14,63 @@ Proactive context compression at natural breakpoints, not reactive to token limi
 ```
 Session 1 (new work):
   → "checkpoint" → creates new checkpoint
+  → chkcc current <checkpoint> → set as current
 
 Session 2+ (continuing):
   → User loads checkpoint manually
+  → chkcc current <checkpoint> → set as current
   → work...
   → "delta" → updates checkpoint with what changed
 
 Done:
-  → move checkpoint to archive/
+  → "archive" → mark complete and move to archive/
+  → chkcc current --clear → clear current status
 ```
 
 **Key principle**: User controls the flow. Load checkpoint manually, then tell the skill what to do.
+
+## Checkpoint States
+
+Checkpoints have three distinct states managed by the `status` field in frontmatter:
+
+| State | Location | Meaning |
+|-------|----------|---------|
+| **current** | `checkpoints/active/` | The ONE checkpoint being actively worked on right now |
+| **active** | `checkpoints/active/` | In-progress work (not the immediate focus) |
+
+### Setting a Checkpoint as Current
+
+Only ONE checkpoint can be `current` at a time. Use the `current` command:
+
+```bash
+# Set a checkpoint as current
+chkcc current <checkpoint>
+
+# Show the current checkpoint
+chkcc current
+
+# Clear the current status
+chkcc current --clear
+```
+
+**When to mark as current**:
+- When starting work on a checkpoint
+- When switching focus from one checkpoint to another
+- This tracks your immediate focus point
+
+**Location note**: Both `current` and `active` checkpoints live in `checkpoints/active/` directory. The `status` field in frontmatter determines which is which (not directory location).
+
+### View Active Checkpoints
+
+Display active checkpoints with summaries:
+
+```bash
+# Show active checkpoints with summaries
+chkcc status
+
+# Include archived checkpoints
+chkcc status --all
+```
 
 ## Unified Command
 
@@ -43,11 +89,15 @@ A single entry point that intelligently routes to the appropriate operation base
 When the unified command is invoked, evaluate context and route:
 
 ```
-Is a checkpoint loaded in context?
-├─ NO → Suggest: Create new checkpoint
-│       "No checkpoint is loaded. Would you like me to create one for the current work?"
+Is a checkpoint marked as current?
+├─ NO → Check if checkpoint loaded in context?
+│       ├─ NO → Suggest: Create new checkpoint
+│       │       "No checkpoint is loaded. Would you like me to create one for the current work?"
+│       │
+│       └─ YES → Suggest: Mark as current
+│               "Found [checkpoint-name]. Should I set it as current? (chkcc current <checkpoint>)"
 │
-└─ YES → Has significant work been done since loading?
+└─ YES → Current checkpoint loaded. Has significant work been done since loading?
          ├─ NO → Inform: Nothing to update
          │       "The checkpoint is loaded but no significant changes detected yet."
          │
@@ -272,6 +322,8 @@ Mark checkpoint as complete and move to historical storage.
    - Remove Summary Section
 5. Git history provides the audit trail of checkpoint evolution
 
+**Archive Validation**: Cannot archive a checkpoint that has active children (checkpoints with `parent` pointing to it). Archive children first, or use `chkcc archive --force` to override.
+
 **Archive Limitations**: Archived checkpoints are historical snapshots, not live state:
 - File references may be outdated (files moved, renamed, deleted)
 - Technical context may no longer apply (dependencies updated)
@@ -323,14 +375,29 @@ Adapt the suggestion to session state:
 
 ```
 checkpoints/
-├── active/                    # Currently loaded into context
+├── active/                    # In-progress checkpoints (both current and active)
 │   ├── INDEX.md               # Quick inventory of active checkpoints
-│   └── chk-feature-name.md    # One per active feature/epic
-└── archive/                   # Historical, not loaded
+│   ├── chk-feature-name.md    # Multiple checkpoints: some current, some active
+│   └── chk-other-feature.md   # (status field in frontmatter determines state)
+└── archive/                   # Completed work (archived state)
     ├── .archive-marker        # Marker: ignore for context purposes
-    ├── chk-auth-system.md
-    └── chk-payment-flow.md
+    ├── chk-auth-system.md     # Historical snapshots
+    └── chk-payment-flow.md    # Not loaded for new sessions
 ```
+
+**Important**: Both `current` and `active` checkpoints live in `checkpoints/active/` directory. The checkpoint's `status` field in frontmatter determines which state it's in:
+
+```yaml
+---
+checkpoint: chk-auth-system
+created: 2025-12-20T10:00:00Z
+status: current  # or "active"
+---
+```
+
+Only the checkpoint marked `status: current` is the immediate focus point. Others in `active/` directory are `status: active` (in progress, but not immediate focus).
+
+**Important**: Archived status is determined by checkpoint location (`checkpoints/archive/` directory), NOT by a `status` field value. When archiving, move the checkpoint to `checkpoints/archive/` instead of changing the status field. The status field only accepts `current` or `active` values.
 
 ## Reference Files
 
