@@ -8,6 +8,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Nothing yet.
 
+## [1.5.0] - 2025-12-26
+
+### Added
+
+- **Current state** - Mark exactly ONE checkpoint as immediate focus
+  - New `status` field in frontmatter: `current` or `active`
+  - Only one checkpoint can be `current` at a time
+  - Distinguishes "working on right now" from "parked but in progress"
+
+- **`chkcc status` command** - Quick orientation view
+  - Shows checkpoint summaries with problem context and next actions
+  - Current checkpoint displayed first
+  - `--all` flag includes archived checkpoints
+
+- **`chkcc current` command** - Manage current checkpoint
+  - `chkcc current <checkpoint>` - Set checkpoint as current
+  - `chkcc current` - Show current checkpoint
+  - `chkcc current --clear` - Clear current marker
+
+- **Archive validation** - Prevent orphaning child checkpoints
+  - Cannot archive a checkpoint with active children
+  - `--force` flag to override validation
+  - Ensures leaves-first archive order for branched checkpoints
+
+- **Scaffold `--current` flag** - Create checkpoint as current immediately
+  - `chkcc scaffold checkpoint <name> --current`
+  - Clears any existing current before setting new one
+
+### Rationale
+
+Working across multiple projects revealed a gap: with several active checkpoints, which one am I actually working on right now? The original active/archived distinction wasn't enough. You might have three checkpoints in `active/` but only one is your immediate focus—the others are parked.
+
+The `current` state solves this. Like `git checkout`, it marks your working context. The `status` command provides quick orientation: "What am I working on and what's next?" without opening files. Archive validation prevents accidentally orphaning child checkpoints when using branching workflows.
+
+Design stayed minimal: one frontmatter field, two new commands, validation at archive time. The status field lives in frontmatter (not directory structure) to keep the filesystem simple while enabling richer state tracking.
+
 ## [1.4.0] - 2025-12-25
 
 ### Added

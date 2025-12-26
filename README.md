@@ -35,6 +35,16 @@ One checkpoint = one focused task. A feature, a phase, a research question. Not 
 
 That's it. The checkpoint file IS the context—Claude reads it and knows exactly where you left off.
 
+## Checkpoint States
+
+| State | Meaning |
+|-------|---------|
+| **current** | The ONE checkpoint you're working on right now |
+| **active** | In-progress but not immediate focus (parked) |
+| **archived** | Completed work (in `archive/` directory) |
+
+Use `chkcc status` to see all active checkpoints with their problem context and next actions.
+
 ## What Gets Preserved
 
 Based on [Factory.ai's research](https://factory.ai/news/compressing-context):
@@ -86,8 +96,13 @@ The skill handles format, naming, and file location.
 | View checkpoint tree | `chkcc tree` |
 | View only active | `chkcc tree -s active` |
 | View only archived | `chkcc tree -s archive` |
+| Show status summaries | `chkcc status` |
+| Set current checkpoint | `chkcc current <checkpoint>` |
+| Show current checkpoint | `chkcc current` |
+| Clear current | `chkcc current --clear` |
 | Validate format | `chkcc validate <file>` |
 | Create checkpoint | `chkcc scaffold checkpoint <name>` |
+| Create as current | `chkcc scaffold checkpoint <name> --current` |
 | Add delta | `chkcc scaffold delta <file>` |
 | Archive checkpoint | `chkcc archive <file>` |
 
@@ -105,7 +120,9 @@ src/chkcc/                 # CLI package
 ├── tree.py                # Tree visualization
 ├── validate.py            # Format validation
 ├── scaffold.py            # Checkpoint/delta creation
-└── archive.py             # Archive functionality
+├── archive.py             # Archive functionality
+├── status.py              # Status summaries
+└── current.py             # Current checkpoint management
 
 checkpoints/
 ├── active/                # Work in progress
@@ -136,8 +153,10 @@ Branching solves this: fork creates a child checkpoint with a `parent` reference
 
 ```
 ⦿ chk-auth-system (2025-12-20) [active]
-└── ○ chk-payment-fix (2025-12-21) [active]
+└── ○ chk-payment-fix (2025-12-21) [current]
 ```
+
+The `[current]` marker shows which checkpoint is your immediate focus. Use `chkcc current <checkpoint>` to switch focus between checkpoints.
 
 One field, one script. Natural evolution, not feature creep.
 
