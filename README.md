@@ -70,9 +70,7 @@ Claude Code discovers and uses the skill automatically.
 ### CLI
 
 ```bash
-uv pip install -e .
-# or run directly
-uv run chkcc --help
+uv tool install ./chkcc
 ```
 
 ## Usage
@@ -112,10 +110,10 @@ The skill handles format, naming, and file location.
 .claude/skills/coihuin-compress/
 ├── SKILL.md               # Skill instructions
 ├── checkpoint-format.md   # Checkpoint specification
-├── compress-tree.py       # Standalone tree script
-└── examples/              # Reference checkpoints
+└── index-format.md        # INDEX format specification
 
-src/chkcc/                 # CLI package
+chkcc/                     # CLI package (flat layout)
+├── pyproject.toml         # Package config
 ├── cli.py                 # Entry point
 ├── tree.py                # Tree visualization
 ├── validate.py            # Format validation
