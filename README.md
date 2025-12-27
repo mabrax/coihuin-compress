@@ -24,6 +24,23 @@ Think of it like saving a game — you don't wait for the game to tell you. You 
 
 One checkpoint = one focused task. A feature, a phase, a research question. Not an entire project—just the thing you're working on right now.
 
+## When to Use (and When Not To)
+
+Checkpoints have overhead. Sometimes you just want Claude to keep working, not stop to document.
+
+**Checkpoints shine when:**
+- Work spans multiple sessions
+- Many decisions accumulate that you'd hate to re-explain
+- You might context-switch away and come back cold
+- The task has branches, dead ends, or complex state
+
+**`/compact` is enough when:**
+- Single session, linear progress
+- Clear next steps that don't need preservation
+- Simple tasks where context loss isn't painful
+
+This isn't a failure mode—it's the right tool for the right job.
+
 ## Workflow
 
 ```
