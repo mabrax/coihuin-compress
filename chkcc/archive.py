@@ -2,12 +2,13 @@
 Archive checkpoint functionality for coihuin-compress.
 
 This module provides functionality for archiving completed checkpoints,
-moving them from the active directory to the archive directory and
-updating the INDEX.md file accordingly.
+moving them from the active directory to the archive directory,
+updating the INDEX.md file, and extracting learnings to LEARNINGS.md.
 """
 
 import re
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from chkcc.tree import Checkpoint, get_children, scan_checkpoints
@@ -188,6 +189,63 @@ def update_index(index_path: Path, checkpoint_name: str) -> None:
     index_path.write_text(content)
 
 
+def extract_learnings(content: str) -> str | None:
+    """Extract learnings from the Completion section.
+
+    Looks for the **Learnings**: field in ## Completion section.
+
+    Args:
+        content: The checkpoint content
+
+    Returns:
+        The learnings text, or None if not found or "None noted"
+    """
+    lines = content.split("\n")
+    in_completion = False
+
+    for line in lines:
+        if line.startswith("## Completion"):
+            in_completion = True
+            continue
+        if in_completion and line.startswith("## "):
+            break  # Hit next section
+        if in_completion and "**Learnings**:" in line:
+            # Extract text after **Learnings**:
+            match = re.search(r"\*\*Learnings\*\*:\s*(.+)", line)
+            if match:
+                learnings = match.group(1).strip()
+                if learnings.lower() in ("none noted", "none", "n/a", "-"):
+                    return None
+                return learnings
+
+    return None
+
+
+def append_to_learnings(
+    checkpoints_dir: Path, checkpoint_id: str, learnings: str
+) -> None:
+    """Append learnings to the LEARNINGS.md file.
+
+    Args:
+        checkpoints_dir: Base checkpoints directory
+        checkpoint_id: The checkpoint ID (e.g., 'chk-auth-system')
+        learnings: The learnings text to append
+    """
+    learnings_path = checkpoints_dir / "LEARNINGS.md"
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # Format the entry
+    entry = f"\n## {today} — {checkpoint_id}\n- {learnings}\n"
+
+    # Create file with header if it doesn't exist
+    if not learnings_path.exists():
+        learnings_path.write_text("# Learnings\n" + entry)
+    else:
+        # Append to existing file
+        with learnings_path.open("a") as f:
+            f.write(entry)
+
+
 def archive_checkpoint(checkpoint_path: Path, force: bool = False) -> Path:
     """Archive a completed checkpoint.
 
@@ -226,25 +284,26 @@ def archive_checkpoint(checkpoint_path: Path, force: bool = False) -> Path:
             f"Add a Completion section before archiving."
         )
 
+    # Extract checkpoint ID from frontmatter (needed for children check and learnings)
+    frontmatter, _ = extract_frontmatter(content)
+    checkpoint_id = frontmatter.get("checkpoint") if frontmatter else None
+
     # Check for active children (unless force=True)
-    if not force:
-        # Extract checkpoint ID from frontmatter
-        frontmatter, _ = extract_frontmatter(content)
-        checkpoint_id = frontmatter.get("checkpoint") if frontmatter else None
+    if not force and checkpoint_id:
+        # Determine base_dir from checkpoint_path
+        # checkpoint_path is in active/, base_dir is parent of active/
+        base_dir = checkpoint_path.parent.parent
 
-        if checkpoint_id:
-            # Determine base_dir from checkpoint_path
-            # checkpoint_path is in active/, base_dir is parent of active/
-            base_dir = checkpoint_path.parent.parent
-
-            active_children = get_active_children(checkpoint_id, base_dir)
-            if active_children:
-                child_names = "\n".join([f"  - {cp.id} ({cp.display_status})" for cp in active_children])
-                raise ValueError(
-                    f"Cannot archive '{checkpoint_id}': has active children\n"
-                    f"{child_names}\n"
-                    f"Archive children first, or use --force to override."
-                )
+        active_children = get_active_children(checkpoint_id, base_dir)
+        if active_children:
+            child_names = "\n".join(
+                [f"  - {cp.id} ({cp.display_status})" for cp in active_children]
+            )
+            raise ValueError(
+                f"Cannot archive '{checkpoint_id}': has active children\n"
+                f"{child_names}\n"
+                f"Archive children first, or use --force to override."
+            )
 
     # Determine archive path (sibling to active/)
     active_dir = checkpoint_path.parent
@@ -264,5 +323,11 @@ def archive_checkpoint(checkpoint_path: Path, force: bool = False) -> Path:
         # Extract checkpoint name from filename (chk-foo.md -> chk-foo)
         checkpoint_name = checkpoint_path.stem
         update_index(index_path, checkpoint_name)
+
+    # Extract and append learnings to LEARNINGS.md
+    if checkpoint_id:
+        learnings = extract_learnings(content)
+        if learnings:
+            append_to_learnings(checkpoints_dir, checkpoint_id, learnings)
 
     return archive_path
