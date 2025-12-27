@@ -3,7 +3,9 @@ See [AGENTS.md](AGENTS.md) for cspec workflow and project context.
 
 ## GitHub Branch Rules
 
-- **Protected branches**: `main` and `develop` (no direct pushes, no deletions, admins enforced)
-- **Workflow**: feature branch → PR → `develop` → PR → `main`
-- **All branches** must come from `develop`
-- **Never** push directly to `main` or `develop` - always create a feature branch first
+- **`main`**: PRs required, no deletions, no force push
+- **`develop`**: Direct push allowed, no deletions, no force push
+- **Workflow**:
+  - Small fixes: push directly to `develop`
+  - Big features: feature branch → PR → `develop`
+  - Releases: PR `develop` → `main`
