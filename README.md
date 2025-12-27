@@ -10,9 +10,9 @@ Long coding sessions lose critical context when automatic summarization occurs. 
 
 ## The Solution
 
-**Proactive compression at natural breakpoints**, not reactive compression when forced by token limits.
+**Continuous maintenance**, not reactive documentation.
 
-Create **checkpoints** (state snapshots) at meaningful moments. Update them with **deltas** as work progresses. Archive when done.
+Create **checkpoints** at meaningful moments. **Maintain them as you work** — decisions, artifacts, state updates happen immediately, not in batches. Archive when done, with learnings extracted automatically.
 
 ## You Drive It
 
@@ -44,13 +44,13 @@ This isn't a failure mode—it's the right tool for the right job.
 ## Workflow
 
 ```
-1. Working on something     → "checkpoint"      → Claude creates file
-2. New session              → read the file     → Claude has full context
-3. Continue working         → "delta"           → checkpoint updated
-4. Done                     → "archive"         → moved to archive/
+1. Start work              → "checkpoint"           → Claude creates file
+2. Work continues          → continuous updates     → checkpoint stays current
+3. New session             → read the file          → Claude has full context
+4. Done                    → "archive"              → learnings extracted
 ```
 
-That's it. The checkpoint file IS the context—Claude reads it and knows exactly where you left off.
+The checkpoint IS the context. Claude maintains it as you work, not as a separate documentation step.
 
 ## Checkpoint States
 
@@ -98,11 +98,10 @@ Talk to Claude Code naturally:
 
 | Action | Say |
 |--------|-----|
-| Create checkpoint | "use compress skill to create checkpoint" |
-| Update checkpoint | "use compress skill to add delta" |
-| Finish & archive | "use compress skill to archive" |
+| Create checkpoint | "checkpoint" or "create checkpoint" |
+| Finish & archive | "archive" |
 
-The skill handles format, naming, and file location.
+Updates happen automatically as you work — Claude maintains the checkpoint continuously. The skill handles format, naming, and file location.
 
 ### Via CLI (direct commands)
 
@@ -141,7 +140,8 @@ chkcc/                     # CLI package (flat layout)
 
 checkpoints/
 ├── active/                # Work in progress
-└── archive/               # Completed
+├── archive/               # Completed
+└── LEARNINGS.md           # Accumulated insights from archives
 ```
 
 ## Background
