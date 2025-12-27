@@ -12,9 +12,10 @@ This document provides coding agents with the context needed to work effectively
 
 ## Tech Stack
 
-- **Languages**: Markdown (skill definition)
+- **Languages**: Markdown (skill definition), Python (CLI)
 - **Framework**: Claude Code Skills system
-- **Dependencies**: Claude Code CLI
+- **CLI**: `chkcc` - Python package managed with uv
+- **Dependencies**: Claude Code CLI, pyyaml
 
 ---
 
@@ -25,13 +26,15 @@ coihuin-compress/
 ├── .claude/skills/coihuin-compress/  # Skill definition
 │   ├── SKILL.md                      # Main skill file
 │   ├── checkpoint-format.md          # Format specification
-│   ├── index-format.md               # INDEX format specification
-│   └── format-check.py               # Validation script
+│   └── index-format.md               # INDEX format specification
+├── chkcc/                            # CLI package (flat layout)
+│   ├── pyproject.toml                # Package config
+│   ├── cli.py                        # Entry point
+│   └── *.py                          # Commands
 ├── checkpoints/
 │   ├── active/                       # Active checkpoints + INDEX.md
 │   └── archive/                      # Completed work
-├── eval/                             # Checkpoint quality evaluation
-└── journal/                          # Daily session journals
+└── scripts/                          # Utility scripts
 ```
 
 ---
@@ -63,6 +66,7 @@ coihuin-compress/
 | File | Purpose |
 |------|---------|
 | `.claude/skills/coihuin-compress/SKILL.md` | Main skill definition |
+| `chkcc/` | CLI package - install with `uv tool install ./chkcc` |
 | `checkpoints/active/INDEX.md` | Active checkpoint inventory |
 | `CHANGELOG.md` | Version history |
 | `README.md` | User documentation |
