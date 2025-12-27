@@ -209,3 +209,28 @@ Add a delta when:
 Update the `last_delta` field in the checkpoint frontmatter when adding a delta.
 
 See `examples/checkpoint-with-delta.md` for a complete example.
+
+## LEARNINGS.md
+
+When a checkpoint is archived, learnings are automatically extracted and appended to `checkpoints/LEARNINGS.md`. This creates a cumulative knowledge base that doesn't get buried in archived checkpoints.
+
+### Structure
+
+```markdown
+# Learnings
+
+## 2025-12-27 — chk-auth-system
+- JWT refresh tokens need 15min expiry, not 1hr
+- Always validate on backend, frontend is just UX
+
+## 2025-12-26 — chk-payment-fix
+- Stripe webhooks retry 3x, must be idempotent
+```
+
+### Extraction
+
+The archive process extracts the `**Learnings**:` field from the `## Completion` section. If learnings are "None noted" or similar, nothing is appended.
+
+### Usage
+
+Read `checkpoints/LEARNINGS.md` at session start to carry forward project-level insights without re-reading archived checkpoints.

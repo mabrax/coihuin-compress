@@ -1,13 +1,11 @@
 ---
 name: coihuin-compress
-description: Proactive context compression for long coding sessions. Creates checkpoints (state snapshots) and deltas (incremental changes). Use when the user asks to checkpoint/delta, OR when suggesting checkpointing at phase completions, major decisions, before risky operations, or after extended work sessions.
+description: Context compression for long coding sessions. Creates checkpoints (state snapshots) and maintains them as you work.
 ---
 
 # Coihuin Compress
 
-Proactive context compression at natural breakpoints, not reactive to token limits.
-
-> **What "proactive" means**: The skill proactively suggests checkpointing at natural moments (phase completion, major decisions, before risky operations), but the user always decides whether to act. This contrasts with *reactive* compression where the system forces summarization when limits are hit.
+Context compression at natural breakpoints, not reactive to token limits.
 
 ## Workflow
 
@@ -17,488 +15,138 @@ Session 1 (new work):
   → chkcc current <checkpoint> → set as current
 
 Session 2+ (continuing):
-  → User loads checkpoint manually
+  → Read checkpoint file
   → chkcc current <checkpoint> → set as current
-  → work...
-  → "delta" → updates checkpoint with what changed
-
-Done:
-  → "archive" → mark complete and move to archive/
-  → chkcc current --clear → clear current status
+  → work + continuous maintenance
+  → "archive" when done
 ```
 
-**Key principle**: User controls the flow. Load checkpoint manually, then tell the skill what to do.
+## Continuous Maintenance
+
+**This is the core principle.** Don't wait for "delta" commands. Update the checkpoint as you work:
+
+| When This Happens | Update This Section |
+|-------------------|---------------------|
+| Decision made | → Decisions |
+| File created/modified/deleted | → Artifact Trail |
+| Task completed | → Play-By-Play, Current State |
+| Blocker hit | → Breadcrumbs, Next Actions |
+| Direction changes | → Session Intent, Next Actions |
+
+**Update immediately, not in batches.** Small, frequent updates keep the checkpoint alive in your working memory.
 
 ## Checkpoint States
 
-Checkpoints have three distinct states managed by the `status` field in frontmatter:
-
 | State | Location | Meaning |
 |-------|----------|---------|
-| **current** | `checkpoints/active/` | The ONE checkpoint being actively worked on right now |
-| **active** | `checkpoints/active/` | In-progress work (not the immediate focus) |
-
-### Setting a Checkpoint as Current
-
-Only ONE checkpoint can be `current` at a time. Use the `current` command:
+| **current** | `checkpoints/active/` | The ONE checkpoint being actively worked on |
+| **active** | `checkpoints/active/` | In-progress work (not immediate focus) |
+| **archived** | `checkpoints/archive/` | Completed work |
 
 ```bash
-# Set a checkpoint as current
-chkcc current <checkpoint>
-
-# Show the current checkpoint
-chkcc current
-
-# Clear the current status
-chkcc current --clear
-```
-
-**When to mark as current**:
-- When starting work on a checkpoint
-- When switching focus from one checkpoint to another
-- This tracks your immediate focus point
-
-**Location note**: Both `current` and `active` checkpoints live in `checkpoints/active/` directory. The `status` field in frontmatter determines which is which (not directory location).
-
-### View Active Checkpoints
-
-Display active checkpoints with summaries:
-
-```bash
-# Show active checkpoints with summaries
-chkcc status
-
-# Include archived checkpoints
-chkcc status --all
-```
-
-## Unified Command
-
-A single entry point that intelligently routes to the appropriate operation based on context.
-
-### Trigger Phrases
-
-| Phrase | Effect |
-|--------|--------|
-| "use compress skill" | Unified command - auto-detect operation |
-| "compress" | Unified command - auto-detect operation |
-| "compress skill" | Unified command - auto-detect operation |
-
-### Decision Tree
-
-When the unified command is invoked, evaluate context and route:
-
-```
-Is a checkpoint marked as current?
-├─ NO → Check if checkpoint loaded in context?
-│       ├─ NO → Suggest: Create new checkpoint
-│       │       "No checkpoint is loaded. Would you like me to create one for the current work?"
-│       │
-│       └─ YES → Suggest: Mark as current
-│               "Found [checkpoint-name]. Should I set it as current? (chkcc current <checkpoint>)"
-│
-└─ YES → Current checkpoint loaded. Has significant work been done since loading?
-         ├─ NO → Inform: Nothing to update
-         │       "The checkpoint is loaded but no significant changes detected yet."
-         │
-         └─ YES → Does work appear complete?
-                  ├─ YES → Suggest: Archive
-                  │       "Work appears complete. Would you like to archive this checkpoint?"
-                  │
-                  └─ NO → Is work diverging into unrelated streams?
-                          ├─ YES → Suggest: Fork (see Fork Detection)
-                          │       "Work seems to be diverging. Should we create a separate checkpoint?"
-                          │
-                          └─ NO → Suggest: Delta
-                                  "You've made progress. Would you like me to update the checkpoint with a delta?"
-```
-
-### Context Detection
-
-**"Checkpoint loaded"** means:
-- User attached a checkpoint file to the conversation (via `@` notation or file read)
-- The checkpoint content is visible in the current context
-- Detection: Look for checkpoint frontmatter (`---\ncheckpoint: <name>\n...`) in recent context
-
-**"Significant work"** means any of:
-- 2+ files modified or created
-- A decision was made and discussed
-- A task from Next Actions was completed
-- User explicitly says work was done
-
-**"Work appears complete"** means:
-- All items in Next Actions are done
-- User says "done", "finished", "complete", or similar
-- No pending blockers remain
-
-Completion checklist (verify before suggesting archive):
-- [ ] Every Next Action item addressed or explicitly deferred
-- [ ] No unresolved blockers in Current State
-- [ ] Original Problem statement satisfied
-- [ ] No "TODO" or "FIXME" mentions in recent work
-- [ ] User sentiment indicates closure (not "one more thing")
-
-**"Work diverging"** means:
-- See Fork Detection section below
-
-### Backward Compatibility
-
-Explicit commands still work and take precedence:
-
-| Command | Effect |
-|---------|--------|
-| "checkpoint", "create checkpoint" | Always creates new checkpoint |
-| "delta", "update checkpoint" | Always updates existing checkpoint |
-| "archive", "archive checkpoint" | Always archives checkpoint |
-
-The unified command is a convenience—it doesn't replace explicit operations. Users who prefer direct control can continue using specific commands.
-
-## Fork Detection
-
-Identify when work diverges into parallel streams that warrant separate checkpoints.
-
-### Strong Fork Signals
-
-Any single strong signal suggests forking:
-
-| Signal | Example |
-|--------|---------|
-| User explicitly says work is unrelated | "This is a different feature entirely" |
-| Work needs its own implementation plan | "Let me plan how to approach this new subsystem" |
-| Multiple issues/tickets involved | "While I'm here, let me also fix ISSUE-234" |
-| Different milestone/epic | "Actually, let's work on the Q2 goals instead" |
-| Fundamental context switch | "Forget auth—let's do the billing integration" |
-
-### Weak Fork Signals
-
-Two or more weak signals together suggest forking:
-
-| Signal | Example |
-|--------|---------|
-| Working in entirely different files | From `src/auth/` to `src/payments/` |
-| Scope expanding beyond original intent | "We should also add..." (repeatedly) |
-| New dependencies introduced | Adding a library unrelated to current work |
-| Different stakeholders affected | "This will need review from the payments team" |
-| Time gap with context shift | "I was working on X, but now I want to do Y" |
-
-### Not a Fork
-
-These do NOT indicate a fork—continue with the current checkpoint:
-
-| Pattern | Why It's Not a Fork |
-|---------|---------------------|
-| Trivial fixes in passing | Typo corrections, lint fixes, small cleanup |
-| Config/tooling changes | Adjusting build config, updating deps, CI tweaks |
-| Supporting changes for main work | Adding a utility function needed by the feature |
-| Refactoring to enable the goal | Restructuring code to implement the main objective |
-| Test additions for current work | Writing tests for the feature being built |
-
-### Fork Decision Flow
-
-When fork signals are detected, prompt the user with options:
-
-```
-Work seems to be diverging from the current checkpoint scope.
-
-Current checkpoint: chk-auth-system
-  Scope: User authentication and session management
-
-Detected: [describe the divergent work]
-
-Options:
-  A) Create separate checkpoint for new work
-     → Creates new checkpoint with `parent: <current-checkpoint-id>`
-     → Current checkpoint remains active (parallel development)
-
-  B) Continue with current checkpoint
-     → Expands scope to include new work (update Problem section)
-
-  C) Abandon divergent work
-     → Set aside new work, refocus on original scope
-
-Which would you prefer?
-```
-
-### Fork Advisory Principles
-
-- **Never auto-fork**: Always present options to the user; never automatically create checkpoints
-- **Always confirm**: Even with strong signals, the user decides what constitutes a "fork"
-- **Respect "no"**: If user chooses to continue with current checkpoint, don't re-suggest
-- **Explain the signal**: Tell the user why you think work is diverging
-- **Low friction**: If user says "just continue", update the checkpoint scope rather than nagging
-
-### Branch Lineage
-
-When forking creates a new checkpoint, the system automatically:
-
-1. Sets the `parent` field to the current checkpoint's ID
-2. The parent checkpoint remains active (enables parallel development)
-3. Use `uv run compress-tree.py` to visualize the lineage
-
-Example: Forking from `chk-auth-system` to work on payments:
-```yaml
----
-checkpoint: chk-payment-flow
-created: 2025-12-21T14:00:00Z
-parent: chk-auth-system
----
-```
-
-This creates a branch visible in the checkpoint tree:
-```
-⦿ chk-auth-system (2025-12-20) [active]
-└── ○ chk-payment-flow (2025-12-21) [active]
+chkcc current <checkpoint>  # Set as current
+chkcc current               # Show current
+chkcc current --clear       # Clear current
+chkcc status                # Show all active with summaries
 ```
 
 ## Operations
 
 ### Checkpoint
 
-Create new state snapshot from scratch.
+Create new state snapshot.
 
-**Trigger**: "checkpoint", "create checkpoint", "save state"
-
-**When**: New work, fresh start, or no existing checkpoint to merge into.
+**Trigger**: "checkpoint", "create checkpoint"
 
 **How**:
 1. Read `checkpoint-format.md` for structure
 2. Extract "What Must Survive" from conversation
 3. Generate checkpoint following the format
-   - If forking from existing checkpoint, set `parent: <source-checkpoint-id>`
 4. Save to `checkpoints/active/<name>.md`
-5. Validate: `uv run format-check.py <file>`
-6. Update `checkpoints/active/INDEX.md`:
-   - Add row to Quick Reference Table
-   - Add Summary Section (see `index-format.md`)
+5. Update `checkpoints/active/INDEX.md`
 
-### Delta
+### Delta (Explicit)
 
-Update an existing checkpoint with changes from the current session.
+Force a structured update when you want visibility into what changed.
 
-**Trigger**: "delta", "update checkpoint", "add delta"
-
-**Prerequisite**: User has loaded existing checkpoint into context.
+**Trigger**: "delta", "update checkpoint"
 
 **How**:
-1. Identify what changed since the checkpoint was created
-2. Update the relevant checkpoint sections:
-   - **Decisions**: Append new decisions
-   - **Play-By-Play**: Append new entries, summarize old
-   - **Artifact Trail**: Update file statuses, add new files
-   - **Current State**: Replace entirely
-   - **Next Actions**: Replace entirely
-3. Optionally add inline delta markers for visibility
-4. Output updated checkpoint for user to save
-5. Update `checkpoints/active/INDEX.md`:
-   - Update Last Updated date in table
-   - Update Status in Summary Section if changed
+1. Add `## Delta: <timestamp>` section to checkpoint
+2. Summarize what changed since last delta
+3. Update main sections with current state
 
-> **Note**: Git tracks checkpoint file history, so separate delta artifacts are unnecessary. The checkpoint itself evolves, with Git providing the audit trail of changes.
+Note: With continuous maintenance, explicit deltas are less necessary. Use when you want a clear marker of progress.
 
 ### Archive
 
-Mark checkpoint as complete and move to historical storage.
+Complete work and move to historical storage.
 
-**Trigger**: "archive", "archive checkpoint"
-
-**When**: Feature/epic complete, work finished.
+**Trigger**: "archive"
 
 **How**:
-1. Capture outcome from user before archiving:
-   > Before archiving, let me capture the outcome:
-   > - What was achieved? (1-2 sentences)
-   > - Any learnings or gotchas worth preserving?
-2. Add `## Completion` section to the checkpoint:
-   ```markdown
-   ## Completion
-   - **Status**: Archived
-   - **Outcome**: [User's description of what was achieved]
-   - **Learnings**: [Any gotchas or insights, or "None noted"]
-   - **Date**: [ISO-8601 timestamp]
-   ```
-3. Move from `checkpoints/active/` to `checkpoints/archive/`
-4. Update `checkpoints/active/INDEX.md`:
-   - Remove row from Quick Reference Table
-   - Remove Summary Section
-5. Git history provides the audit trail of checkpoint evolution
+1. Capture outcome from user:
+   > What was achieved? Any learnings worth preserving?
+2. Add `## Completion` section with status, outcome, learnings, date
+3. Move to `checkpoints/archive/`
+4. Update `checkpoints/active/INDEX.md`
+5. Learnings auto-extracted to `checkpoints/LEARNINGS.md`
 
-**Archive Validation**: Cannot archive a checkpoint that has active children (checkpoints with `parent` pointing to it). Archive children first, or use `chkcc archive --force` to override.
+**Validation**: Cannot archive checkpoints with active children (use `--force` to override).
 
-**Archive Limitations**: Archived checkpoints are historical snapshots, not live state:
-- File references may be outdated (files moved, renamed, deleted)
-- Technical context may no longer apply (dependencies updated)
-- Decisions may have been revisited in later work
+## Fork Detection
 
-Use for: understanding decisions, auditing evolution, onboarding context.
-Do NOT use for: resuming work, current state, Claude context loading.
+When work diverges into parallel streams, offer options:
 
-## Proactive Advisory Triggers
+**Strong signals** (any one suggests fork):
+- User says work is unrelated
+- Different issue/ticket involved
+- Fundamental context switch
 
-The skill should suggest checkpointing/delta at natural moments. These are advisory—user always decides.
+**Weak signals** (two+ together suggest fork):
+- Working in entirely different files
+- Scope expanding beyond original intent
+- New dependencies unrelated to current work
 
-### When to Suggest
+**When detected**, present options:
+- A) Create separate checkpoint (sets `parent` for lineage)
+- B) Continue with current (expand scope)
+- C) Set aside divergent work
 
-| Trigger | Suggest When |
-|---------|--------------|
-| Phase completion | A milestone, phase, or significant task completes |
-| Major decision | An architectural or design decision is made |
-| Before risky ops | About to start refactor, migration, or major change |
-| Extended session | 5+ file modifications accumulated |
-| Context shift | Work direction changing substantially |
-| Session end | User indicates ending ("let's continue tomorrow") |
-| Work complete | All Next Actions done, user says "done/finished", no blockers remain |
-
-### What to Suggest
-
-Adapt the suggestion to session state:
-
-**No checkpoint loaded:**
-> You've completed [milestone]. This is a natural checkpoint moment—would you like me to create one?
-
-**Checkpoint loaded:**
-> You've made significant progress since loading the checkpoint. Would you like me to update it with a delta?
-
-**Before risky operation:**
-> Before starting this [operation], you might want to preserve the current state. Should I create/update the checkpoint?
-
-**Work complete:**
-> All Next Actions appear done and no blockers remain. Would you like to archive this checkpoint? Before archiving, I'll ask what was achieved and any learnings to preserve.
-
-### Advisory Principles
-
-- **Suggest, don't execute**: Wait for user confirmation
-- **Be specific**: Name the milestone or trigger reason
-- **Don't nag**: One suggestion per trigger moment, not repeated reminders
-- **Accept "no"**: If user declines, continue without further prompting
+**Not a fork**: Trivial fixes, config changes, supporting changes for main work.
 
 ## Directory Structure
 
 ```
 checkpoints/
-├── active/                    # In-progress checkpoints (both current and active)
-│   ├── INDEX.md               # Quick inventory of active checkpoints
-│   ├── chk-feature-name.md    # Multiple checkpoints: some current, some active
-│   └── chk-other-feature.md   # (status field in frontmatter determines state)
-└── archive/                   # Completed work (archived state)
-    ├── .archive-marker        # Marker: ignore for context purposes
-    ├── chk-auth-system.md     # Historical snapshots
-    └── chk-payment-flow.md    # Not loaded for new sessions
+├── active/
+│   ├── INDEX.md
+│   └── chk-*.md
+├── archive/
+│   └── chk-*.md
+└── LEARNINGS.md          # Accumulated insights from archives
 ```
-
-**Important**: Both `current` and `active` checkpoints live in `checkpoints/active/` directory. The checkpoint's `status` field in frontmatter determines which state it's in:
-
-```yaml
----
-checkpoint: chk-auth-system
-created: 2025-12-20T10:00:00Z
-status: current  # or "active"
----
-```
-
-Only the checkpoint marked `status: current` is the immediate focus point. Others in `active/` directory are `status: active` (in progress, but not immediate focus).
-
-**Important**: Archived status is determined by checkpoint location (`checkpoints/archive/` directory), NOT by a `status` field value. When archiving, move the checkpoint to `checkpoints/archive/` instead of changing the status field. The status field only accepts `current` or `active` values.
 
 ## Reference Files
 
 | File | Purpose |
 |------|---------|
-| `checkpoint-format.md` | Checkpoint and delta structure specification |
+| `checkpoint-format.md` | Checkpoint structure specification |
 | `index-format.md` | INDEX.md structure specification |
-| `examples/checkpoint.md` | Initial checkpoint example (no deltas yet) |
-| `examples/checkpoint-with-delta.md` | Checkpoint with deltas example (shows accumulation) |
-| `format-check.py` | Format validation script |
-| `compress-tree.py` | Checkpoint tree visualization script |
+| `LEARNINGS.md` | Accumulated learnings from archived checkpoints |
 
 ## Priority Hierarchy (token pressure)
 
 1. **Must Keep**: Problem, session intent, decisions, current state, next actions
-2. **Should Keep**: Recent artifact trail, recent play-by-play, technical context, breadcrumbs
+2. **Should Keep**: Recent artifacts, recent play-by-play, technical context, breadcrumbs
 3. **Can Summarize**: Older play-by-play, completed artifacts, historical decisions
 
-## Semantic Quality Self-Check
+## Quality Self-Check
 
-Before finalizing a checkpoint, verify it would enable a fresh agent to resume work effectively. Ask yourself these five questions:
+Before finalizing updates, verify:
 
-### 1. Problem Clarity
-> Could a fresh agent understand what we're trying to solve without reading the conversation?
-
-The Problem section should stand alone. If it references "the issue" or "what we discussed" without explanation, it fails this check.
-
-### 2. Decision Rationale
-> For each decision, is the "why" captured—not just the "what"?
-
-Decisions without rationale force future agents to re-debate resolved questions. Include: what was decided, why, and what alternatives were rejected.
-
-### 3. State Specificity
-> Does Current State describe concrete progress, not vague status?
-
-Bad: "Made good progress on the feature"
-Good: "Implemented user authentication with JWT tokens; login endpoint working, logout not started"
-
-### 4. Action Actionability
-> Could someone execute Next Actions without asking clarifying questions?
-
-Each action should be specific enough to start immediately. "Fix the bug" fails; "Fix null pointer in UserService.validate() when email is empty" passes.
-
-### 5. Fresh Agent Test
-> If I imagine loading this checkpoint tomorrow with no memory, would I know exactly what to do?
-
-This is the ultimate test. Read the checkpoint as if you've never seen the project. Does it work?
-
----
-
-**Note**: This self-check is guidance for checkpoint authors—it is not automated validation. The `format-check.py` script validates structure; this section helps ensure semantic quality. For formal evaluation, see `eval/rubric.md`.
-
-## Checkpoint Evaluation
-
-Evaluate checkpoint quality using a dialectic process that combines human judgment with agent verification.
-
-### Usage
-
-```
-/eval-checkpoint <name>
-```
-
-Place checkpoints to evaluate in `eval/inbox/`. The command expects a checkpoint filename (with or without `.md` extension).
-
-### The 3-Phase Dialectic Process
-
-1. **Human Interview**: User answers 5 questions (one per quality dimension) about the checkpoint. Answers map to preliminary scores (A=5, B=4, C=3, D=2, E=1).
-
-2. **Agent Investigation**: Three parallel verification tasks:
-   - Artifact verification (files exist and match descriptions)
-   - Breadcrumb validation (references are valid)
-   - Git correlation (play-by-play matches commit history)
-
-3. **Correlation & Synthesis**: Agent evidence modifies human scores. Strong supporting evidence can raise scores; contradictions lower them. Final weighted score determines quality.
-
-### Quality Dimensions
-
-| Dimension | Weight | What It Measures |
-|-----------|--------|------------------|
-| Recoverability | 30% | Could a fresh agent resume work from this alone? |
-| Completeness | 20% | Are all required sections meaningfully filled? |
-| Clarity | 20% | Is the language unambiguous without prior context? |
-| Token Efficiency | 15% | Is information dense without unnecessary verbosity? |
-| Actionability | 15% | Are Next Actions specific enough to execute? |
-
-See `eval/rubric.md` for detailed scoring criteria per dimension.
-
-### Dogfooding Workflow
-
-The evaluation system supports continuous improvement through example collection:
-
-```
-eval/
-├── inbox/      # Checkpoints awaiting evaluation
-├── scored/     # Evaluated checkpoints with scores
-└── promoted/   # High-quality examples (score >= 4.0)
-```
-
-**Workflow**:
-1. **Collect**: Copy checkpoints into `eval/inbox/` for evaluation
-2. **Evaluate**: Run `/eval-checkpoint <name>` to score
-3. **Promote**: Checkpoints scoring >= 4.0 (with no dimension below 3 and Recoverability >= 4) can be promoted to `eval/promoted/` as reference examples
-
-Promoted checkpoints serve as canonical examples of well-structured state snapshots.
+1. **Problem Clarity**: Could a fresh agent understand without the conversation?
+2. **Decision Rationale**: Is the "why" captured, not just the "what"?
+3. **State Specificity**: Concrete progress, not vague status?
+4. **Action Actionability**: Can someone execute Next Actions immediately?
+5. **Fresh Agent Test**: Loading this cold, would you know exactly what to do?
