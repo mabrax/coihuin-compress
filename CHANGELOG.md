@@ -8,6 +8,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Nothing yet.
 
+## [1.6.0] - 2025-12-27
+
+### Added
+
+- **Learnings extraction** - Knowledge persists beyond archived checkpoints
+  - On archive, learnings auto-extracted from `## Completion` section
+  - Appended to `checkpoints/LEARNINGS.md` with date and checkpoint name
+  - Read at session start for project-level insights
+
+- **Continuous Maintenance model** - Checkpoints as living working state
+  - Update checkpoint sections immediately as you work, not in batches
+  - Decision made → update Decisions; file changed → update Artifact Trail
+  - Small, frequent updates keep checkpoint in Claude's active awareness
+
+### Changed
+
+- **SKILL.md compressed** - 505 → 153 lines (70% reduction)
+  - Removed proactive advisory triggers (they diluted over long sessions)
+  - Removed checkpoint evaluation section
+  - Simplified fork detection
+  - Core focus: continuous maintenance
+
+### Removed
+
+- **Proactive advisory triggers** - Replaced by continuous maintenance model
+  - Old: "suggest checkpointing at phase completion, major decisions..."
+  - New: maintain the checkpoint as you work, no suggestions needed
+
+### Rationale
+
+Through daily usage across projects, a friction surfaced: checkpoints are read once at session start but fade from Claude's awareness as conversations grow. The skill instructions said "update when there's progress" but that got lost in the noise.
+
+The insight came from comparing to TodoWrite: it stays alive because Claude touches it constantly. Checkpoints were designed as documentation—read once, update occasionally. The evolution: treat checkpoints as working state, updated continuously like a todo list.
+
+The proactive triggers were well-intentioned but added cognitive load to the instructions. With continuous maintenance, Claude doesn't need to be told when to update—it's woven into the workflow.
+
+Learnings extraction solves a different problem: insights get buried in archived checkpoints. Now they accumulate in one place, readable at session start.
+
 ## [1.5.0] - 2025-12-26
 
 ### Added
