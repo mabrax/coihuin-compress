@@ -118,6 +118,7 @@ Updates happen automatically as you work — Claude maintains the checkpoint con
 | **Setup** | |
 | Initialize project | `chkcc init` |
 | Check setup health | `chkcc doctor` |
+| Check and fix issues | `chkcc doctor --fix` |
 | **Context** | |
 | Output current checkpoint | `chkcc prime` |
 | Output with header | `chkcc prime --header` |

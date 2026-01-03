@@ -101,3 +101,49 @@ def test_cmd_doctor_unhealthy(tmp_path, capsys):
     assert exit_code == 1
     captured = capsys.readouterr()
     assert "Issues found" in captured.out
+
+
+def test_cmd_doctor_fix_creates_structure(tmp_path, capsys):
+    """Doctor --fix creates missing directories and files."""
+    base = tmp_path / "checkpoints"
+
+    exit_code = doctor.cmd_doctor(base, tmp_path, fix=True)
+
+    assert exit_code == 0
+    assert (base / "active").is_dir()
+    assert (base / "archive").is_dir()
+    assert (base / "active" / "INDEX.md").exists()
+    assert (base / "archive" / "INDEX.md").exists()
+    captured = capsys.readouterr()
+    assert "Fixing issues" in captured.out
+
+
+def test_cmd_doctor_fix_installs_hook(tmp_path, capsys):
+    """Doctor --fix installs missing hook."""
+    base = tmp_path / "checkpoints"
+
+    exit_code = doctor.cmd_doctor(base, tmp_path, fix=True)
+
+    assert exit_code == 0
+    settings_path = tmp_path / ".claude" / "settings.json"
+    assert settings_path.exists()
+    settings = json.loads(settings_path.read_text())
+    assert "SessionStart" in settings["hooks"]
+    captured = capsys.readouterr()
+    assert "Installed hook" in captured.out
+
+
+def test_cmd_doctor_fix_then_healthy(tmp_path, capsys):
+    """After --fix, a second doctor run shows healthy."""
+    base = tmp_path / "checkpoints"
+
+    # First run with fix
+    doctor.cmd_doctor(base, tmp_path, fix=True)
+    capsys.readouterr()  # Clear output
+
+    # Second run without fix
+    exit_code = doctor.cmd_doctor(base, tmp_path, fix=False)
+
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "All checks passed" in captured.out
