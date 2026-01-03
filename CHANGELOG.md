@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.7.0] - 2026-01-03
+
 ### Added
 
 - **`chkcc init` command** - One-command project setup
@@ -32,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Unit test suite** - pytest-based tests for CLI
   - `tests/test_prime.py` - 4 tests for prime command
   - `tests/test_init.py` - 6 tests for init command
-  - `tests/test_doctor.py` - 7 tests for doctor command
+  - `tests/test_doctor.py` - 10 tests for doctor command (including --fix)
   - pytest added as dev dependency
 
 ### Rationale
