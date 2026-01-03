@@ -196,7 +196,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     """Handle 'doctor' subcommand."""
     base_dir = Path(args.dir).expanduser().resolve()
     project_root = Path(args.project).expanduser().resolve()
-    return doctor.cmd_doctor(base_dir, project_root)
+    return doctor.cmd_doctor(base_dir, project_root, fix=args.fix)
 
 
 def main() -> None:
@@ -396,6 +396,11 @@ def main() -> None:
             "--project",
             default=".",
             help="Project root directory (default: current directory)",
+        )
+        doctor_parser.add_argument(
+            "--fix",
+            action="store_true",
+            help="Automatically fix any issues found",
         )
         doctor_parser.set_defaults(func=cmd_doctor)
 

@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from chkcc import init
+
 
 def check_directory(path: Path) -> tuple[bool, str]:
     """Check if directory exists."""
@@ -40,7 +42,7 @@ def check_hook(project_root: Path) -> tuple[bool, str]:
     return (False, "✗ SessionStart hook not found")
 
 
-def cmd_doctor(base_dir: Path, project_root: Path) -> int:
+def cmd_doctor(base_dir: Path, project_root: Path, fix: bool = False) -> int:
     """Main doctor command logic. Returns 0 if healthy, 1 if issues found."""
     print("Checking coihuin-compress setup...")
     print()
@@ -67,6 +69,29 @@ def cmd_doctor(base_dir: Path, project_root: Path) -> int:
     if all_passed:
         print("All checks passed.")
         return 0
-    else:
-        print("Issues found. Run 'chkcc init' to fix.")
+
+    if not fix:
+        print("Issues found. Run 'chkcc doctor --fix' to repair.")
         return 1
+
+    # Fix mode: repair issues
+    print("Fixing issues...")
+    print()
+
+    # Fix directories and INDEX files
+    created_dirs = init.create_directory_structure(base_dir)
+    for d in created_dirs:
+        print(f"  Created: {d}")
+
+    created_files = init.create_index_files(base_dir)
+    for f in created_files:
+        print(f"  Created: {f}")
+
+    # Fix hook
+    installed, msg = init.install_hook(project_root)
+    if installed:
+        print(f"  Installed hook: {msg}")
+
+    print()
+    print("Fixed. Run 'chkcc doctor' to verify.")
+    return 0

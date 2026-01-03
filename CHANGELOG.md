@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Validates SessionStart hook is installed
   - Reports status with checkmarks/crosses
   - Returns exit code 1 if issues found
+  - `--fix` flag automatically repairs all issues
 
 - **`chkcc prime` command** - Context recovery for hooks
   - Outputs current checkpoint content to stdout
