@@ -6,7 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **`chkcc init` command** - One-command project setup
+  - Creates `checkpoints/active/` and `checkpoints/archive/` directories
+  - Creates `INDEX.md` files in both directories
+  - Installs `SessionStart` hook into `.claude/settings.json`
+  - Merges with existing hooks if settings.json already exists
+  - Idempotent: skips what already exists
+
+- **`chkcc doctor` command** - Health check for setup
+  - Validates directory structure exists
+  - Validates INDEX.md exists
+  - Validates SessionStart hook is installed
+  - Reports status with checkmarks/crosses
+  - Returns exit code 1 if issues found
+
+- **`chkcc prime` command** - Context recovery for hooks
+  - Outputs current checkpoint content to stdout
+  - Silent exit (code 0, no output) if no current checkpoint
+  - `--header` flag prepends `# Context Recovery: {checkpoint-name}`
+  - Designed for Claude Code `SessionStart` hooks
+
+- **Unit test suite** - pytest-based tests for CLI
+  - `tests/test_prime.py` - 4 tests for prime command
+  - `tests/test_init.py` - 6 tests for init command
+  - `tests/test_doctor.py` - 7 tests for doctor command
+  - pytest added as dev dependency
+
+### Rationale
+
+The skill and CLI work great once set up, but onboarding friction remained: manually creating directories, understanding the structure, remembering to read the checkpoint at session start. The `init` command eliminates setup friction—one command creates everything including the hook that primes context on session start.
+
+The `prime` command enables automatic context recovery. When installed as a `SessionStart` hook, it outputs the current checkpoint at the start of every session. Claude reads this and immediately has full context. No manual "read the checkpoint" step needed.
+
+The `doctor` command provides visibility into setup state. "Is everything configured correctly?" becomes a single command instead of manually checking multiple files and directories.
 
 ## [1.6.0] - 2025-12-27
 

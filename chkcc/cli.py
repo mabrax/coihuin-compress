@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from chkcc import archive, current, scaffold, status, tree, validate
+from chkcc import archive, current, doctor, init, scaffold, status, tree, validate
 
 
 def cmd_tree(args: argparse.Namespace) -> int:
@@ -166,6 +166,39 @@ def cmd_current(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_prime(args: argparse.Namespace) -> int:
+    """Handle 'prime' subcommand."""
+    base_dir = Path(args.dir).expanduser().resolve()
+
+    checkpoint = current.get_current(base_dir)
+    if checkpoint is None:
+        return 0  # Silent exit, no error
+
+    content = checkpoint.path.read_text(encoding='utf-8')
+
+    if args.header:
+        print(f"# Context Recovery: {checkpoint.id}")
+        print()
+
+    print(content, end='')  # Avoid extra newline if content already ends with one
+    return 0
+
+
+def cmd_init(args: argparse.Namespace) -> int:
+    """Handle 'init' subcommand."""
+    base_dir = Path(args.dir).expanduser().resolve()
+    project_root = Path(args.project).expanduser().resolve()
+    init.cmd_init(base_dir, project_root)
+    return 0
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    """Handle 'doctor' subcommand."""
+    base_dir = Path(args.dir).expanduser().resolve()
+    project_root = Path(args.project).expanduser().resolve()
+    return doctor.cmd_doctor(base_dir, project_root)
+
+
 def main() -> None:
     """Main entry point for the CLI."""
     try:
@@ -314,6 +347,57 @@ def main() -> None:
             help="Checkpoints directory (default: ./checkpoints)",
         )
         current_parser.set_defaults(func=cmd_current)
+
+        # prime command
+        prime_parser = subparsers.add_parser(
+            "prime",
+            help="Output current checkpoint content to stdout",
+        )
+        prime_parser.add_argument(
+            "--dir",
+            default="./checkpoints",
+            help="Checkpoints directory (default: ./checkpoints)",
+        )
+        prime_parser.add_argument(
+            "--header",
+            action="store_true",
+            help="Prepend '# Context Recovery: {checkpoint-name}' header",
+        )
+        prime_parser.set_defaults(func=cmd_prime)
+
+        # init command
+        init_parser = subparsers.add_parser(
+            "init",
+            help="Initialize coihuin-compress in current project",
+        )
+        init_parser.add_argument(
+            "--dir",
+            default="./checkpoints",
+            help="Checkpoints directory (default: ./checkpoints)",
+        )
+        init_parser.add_argument(
+            "--project",
+            default=".",
+            help="Project root directory (default: current directory)",
+        )
+        init_parser.set_defaults(func=cmd_init)
+
+        # doctor command
+        doctor_parser = subparsers.add_parser(
+            "doctor",
+            help="Check coihuin-compress setup health",
+        )
+        doctor_parser.add_argument(
+            "--dir",
+            default="./checkpoints",
+            help="Checkpoints directory (default: ./checkpoints)",
+        )
+        doctor_parser.add_argument(
+            "--project",
+            default=".",
+            help="Project root directory (default: current directory)",
+        )
+        doctor_parser.set_defaults(func=cmd_doctor)
 
         # Parse arguments
         args = parser.parse_args()

@@ -90,6 +90,14 @@ Claude Code discovers and uses the skill automatically.
 uv tool install ./chkcc
 ```
 
+Then initialize in your project:
+
+```bash
+chkcc init
+```
+
+This creates the checkpoint directories and installs a `SessionStart` hook that automatically loads context at session start.
+
 ## Usage
 
 ### Via Skill (conversational)
@@ -107,6 +115,13 @@ Updates happen automatically as you work — Claude maintains the checkpoint con
 
 | Action | Command |
 |--------|---------|
+| **Setup** | |
+| Initialize project | `chkcc init` |
+| Check setup health | `chkcc doctor` |
+| **Context** | |
+| Output current checkpoint | `chkcc prime` |
+| Output with header | `chkcc prime --header` |
+| **Navigation** | |
 | View checkpoint tree | `chkcc tree` |
 | View only active | `chkcc tree -s active` |
 | View only archived | `chkcc tree -s archive` |
@@ -114,6 +129,7 @@ Updates happen automatically as you work — Claude maintains the checkpoint con
 | Set current checkpoint | `chkcc current <checkpoint>` |
 | Show current checkpoint | `chkcc current` |
 | Clear current | `chkcc current --clear` |
+| **Checkpoint management** | |
 | Validate format | `chkcc validate <file>` |
 | Create checkpoint | `chkcc scaffold checkpoint <name>` |
 | Create as current | `chkcc scaffold checkpoint <name> --current` |
@@ -136,7 +152,13 @@ chkcc/                     # CLI package (flat layout)
 ├── scaffold.py            # Checkpoint/delta creation
 ├── archive.py             # Archive functionality
 ├── status.py              # Status summaries
-└── current.py             # Current checkpoint management
+├── current.py             # Current checkpoint management
+├── init.py                # Project initialization
+├── doctor.py              # Setup health check
+└── tests/                 # Unit tests
+    ├── test_prime.py
+    ├── test_init.py
+    └── test_doctor.py
 
 checkpoints/
 ├── active/                # Work in progress
