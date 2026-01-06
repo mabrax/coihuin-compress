@@ -1,6 +1,8 @@
 """Initialize coihuin-compress in a project."""
 
 import json
+from importlib import resources
+from importlib.resources import abc as resources_abc
 from pathlib import Path
 
 INDEX_TEMPLATE = """# {title} Checkpoints
@@ -12,11 +14,6 @@ INDEX_TEMPLATE = """# {title} Checkpoints
 
 *No {status} checkpoints.*
 """
-
-HOOK_CONFIG = {
-    "type": "command",
-    "command": "chkcc prime 2>/dev/null || true"
-}
 
 
 def create_directory_structure(base_dir: Path) -> list[str]:
@@ -52,8 +49,44 @@ def create_index_files(base_dir: Path) -> list[str]:
     return created
 
 
-def install_hook(project_root: Path) -> tuple[bool, str]:
-    """Install SessionStart hook. Returns (installed, message)."""
+def install_skill_files(project_root: Path) -> list[str]:
+    """
+    Copy all files from package chkcc/data/skill/ to .claude/skills/coihuin-compress/.
+
+    Returns:
+        List of created file paths.
+    """
+    created = []
+    skills_dir = project_root / ".claude" / "skills" / "coihuin-compress"
+
+    # Use importlib.resources to access package data
+    package_path = resources.files("chkcc").joinpath("data", "skill")
+
+    def traverse(base: resources_abc.Traversable, prefix: str = "") -> None:
+        """Recursively traverse and copy package resources."""
+        for item in base.iterdir():
+            rel_path = str(Path(prefix) / item.name) if prefix else item.name
+
+            if item.is_file():
+                target_path = skills_dir / rel_path
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_bytes(item.read_bytes())
+                created.append(str(target_path))
+            elif item.is_dir():
+                traverse(item, rel_path)
+
+    traverse(package_path)
+    return created
+
+
+def install_hooks(project_root: Path) -> list[tuple[bool, str]]:
+    """
+    Install SessionStart and Stop hooks.
+
+    Returns:
+        List of (installed, message) tuples for each hook type.
+    """
+    results = []
     claude_dir = project_root / ".claude"
     settings_path = claude_dir / "settings.json"
 
@@ -70,22 +103,65 @@ def install_hook(project_root: Path) -> tuple[bool, str]:
     if "hooks" not in settings:
         settings["hooks"] = {}
 
+    # Install SessionStart hook
     if "SessionStart" not in settings["hooks"]:
         settings["hooks"]["SessionStart"] = []
 
-    # Check if hook already installed
     session_hooks = settings["hooks"]["SessionStart"]
-    for hook in session_hooks:
-        if isinstance(hook, dict) and "chkcc prime" in hook.get("command", ""):
-            return (False, "Hook already installed")
+    session_installed = False
 
-    # Add the hook
-    session_hooks.append(HOOK_CONFIG)
+    # Check if SessionStart hook already installed
+    for hook_entry in session_hooks:
+        if isinstance(hook_entry, dict) and hook_entry.get("matcher") == "":
+            for h in hook_entry.get("hooks", []):
+                if isinstance(h, dict) and "chkcc prime" in h.get("command", ""):
+                    session_installed = True
+                    break
 
-    # Write back
+    if not session_installed:
+        # Add matcher-based SessionStart hook
+        session_hooks.append({
+            "matcher": "",
+            "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]
+        })
+        results.append((True, "SessionStart hook installed"))
+    else:
+        results.append((False, "SessionStart hook already installed"))
+
+    # Install Stop hook
+    if "Stop" not in settings["hooks"]:
+        settings["hooks"]["Stop"] = []
+
+    stop_hooks = settings["hooks"]["Stop"]
+    stop_installed = False
+
+    # Check if Stop hook already installed (new or old format)
+    for hook_entry in stop_hooks:
+        if isinstance(hook_entry, dict):
+            # New matcher-based format
+            if hook_entry.get("matcher") == "":
+                for h in hook_entry.get("hooks", []):
+                    if isinstance(h, dict) and "chkcc stop-hook" in h.get("command", ""):
+                        stop_installed = True
+                        break
+            # Old direct hook format (stop-checkpoint.py)
+            if "stop-checkpoint.py" in hook_entry.get("command", ""):
+                stop_installed = True
+
+    if not stop_installed:
+        # Add matcher-based Stop hook
+        stop_hooks.append({
+            "matcher": "",
+            "hooks": [{"type": "command", "command": "chkcc stop-hook"}]
+        })
+        results.append((True, "Stop hook installed"))
+    else:
+        results.append((False, "Stop hook already installed"))
+
+    # Write back settings
     settings_path.write_text(json.dumps(settings, indent=2) + "\n")
 
-    return (True, str(settings_path))
+    return results
 
 
 def cmd_init(base_dir: Path, project_root: Path) -> None:
@@ -103,12 +179,18 @@ def cmd_init(base_dir: Path, project_root: Path) -> None:
     for f in created_files:
         print(f"  Created: {f}")
 
-    # Install hook
-    installed, msg = install_hook(project_root)
-    if installed:
-        print(f"  Installed hook: {msg}")
-    else:
-        print(f"  {msg}")
+    # Install skill files
+    created_skills = install_skill_files(project_root)
+    for f in created_skills:
+        print(f"  Installed: {f}")
+
+    # Install hooks
+    hook_results = install_hooks(project_root)
+    for installed, msg in hook_results:
+        if installed:
+            print(f"  Installed hook: {msg}")
+        else:
+            print(f"  {msg}")
 
     print()
     print("Done. Run 'chkcc doctor' to verify setup.")

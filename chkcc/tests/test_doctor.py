@@ -81,9 +81,28 @@ def test_cmd_doctor_healthy(tmp_path, capsys):
     claude_dir.mkdir()
     (claude_dir / "settings.json").write_text(
         json.dumps(
-            {"hooks": {"SessionStart": [{"command": "chkcc prime 2>/dev/null || true"}]}}
+            {
+                "hooks": {
+                    "SessionStart": [
+                        {"matcher": "", "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]}
+                    ],
+                    "Stop": [
+                        {"matcher": "", "hooks": [{"type": "command", "command": "chkcc stop-hook"}]}
+                    ],
+                }
+            }
         )
     )
+
+    # Setup skill files (must match what doctor expects from package)
+    from chkcc.update import get_package_skill_files
+
+    skill_dir = claude_dir / "skills" / "coihuin-compress"
+    skill_dir.mkdir(parents=True)
+    for rel_path, content in get_package_skill_files().items():
+        file_path = skill_dir / rel_path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_bytes(content)
 
     exit_code = doctor.cmd_doctor(base, tmp_path)
 
@@ -119,7 +138,7 @@ def test_cmd_doctor_fix_creates_structure(tmp_path, capsys):
 
 
 def test_cmd_doctor_fix_installs_hook(tmp_path, capsys):
-    """Doctor --fix installs missing hook."""
+    """Doctor --fix installs missing hooks."""
     base = tmp_path / "checkpoints"
 
     exit_code = doctor.cmd_doctor(base, tmp_path, fix=True)
@@ -129,8 +148,10 @@ def test_cmd_doctor_fix_installs_hook(tmp_path, capsys):
     assert settings_path.exists()
     settings = json.loads(settings_path.read_text())
     assert "SessionStart" in settings["hooks"]
+    assert "Stop" in settings["hooks"]
     captured = capsys.readouterr()
-    assert "Installed hook" in captured.out
+    assert "Installed: SessionStart hook installed" in captured.out
+    assert "Installed: Stop hook installed" in captured.out
 
 
 def test_cmd_doctor_fix_then_healthy(tmp_path, capsys):

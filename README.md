@@ -76,27 +76,35 @@ Based on [Factory.ai's research](https://factory.ai/news/compressing-context):
 
 ## Installation
 
-### Skill (Claude Code)
+### One-Time Setup (global)
 
 ```bash
-cp -r .claude/skills/coihuin-compress /path/to/your/project/.claude/skills/
-```
-
-Claude Code discovers and uses the skill automatically.
-
-### CLI
-
-```bash
+git clone <this-repo>
+cd coihuin-compress
 uv tool install ./chkcc
 ```
 
-Then initialize in your project:
+### Per-Project Setup
 
 ```bash
+cd your-project
 chkcc init
 ```
 
-This creates the checkpoint directories and installs a `SessionStart` hook that automatically loads context at session start.
+This creates:
+- `checkpoints/active/` and `checkpoints/archive/` directories
+- `INDEX.md` files
+- `.claude/skills/coihuin-compress/` (skill files)
+- `SessionStart` hook (auto-loads context)
+- `Stop` hook (reminds to checkpoint before ending)
+
+### After Package Updates
+
+```bash
+chkcc update
+```
+
+Syncs skill files from package to project. Use `--dry-run` to preview, `--force` to overwrite local modifications.
 
 ## Usage
 
@@ -117,6 +125,8 @@ Updates happen automatically as you work — Claude maintains the checkpoint con
 |--------|---------|
 | **Setup** | |
 | Initialize project | `chkcc init` |
+| Sync skill files | `chkcc update` |
+| Preview sync | `chkcc update --dry-run` |
 | Check setup health | `chkcc doctor` |
 | Check and fix issues | `chkcc doctor --fix` |
 | **Context** | |
@@ -140,31 +150,35 @@ Updates happen automatically as you work — Claude maintains the checkpoint con
 ## Project Structure
 
 ```
-.claude/skills/coihuin-compress/
-├── SKILL.md               # Skill instructions
-├── checkpoint-format.md   # Checkpoint specification
-└── index-format.md        # INDEX format specification
-
-chkcc/                     # CLI package (flat layout)
+chkcc/                     # CLI package (canonical source)
 ├── pyproject.toml         # Package config
 ├── cli.py                 # Entry point
+├── init.py                # Project initialization
+├── update.py              # Skill file sync
+├── doctor.py              # Setup health check
+├── stop_hook.py           # Stop hook logic
 ├── tree.py                # Tree visualization
 ├── validate.py            # Format validation
 ├── scaffold.py            # Checkpoint/delta creation
 ├── archive.py             # Archive functionality
 ├── status.py              # Status summaries
 ├── current.py             # Current checkpoint management
-├── init.py                # Project initialization
-├── doctor.py              # Setup health check
+├── data/skill/            # SKILL FILES (canonical source)
+│   ├── SKILL.md
+│   ├── checkpoint-format.md
+│   ├── index-format.md
+│   └── examples/
 └── tests/                 # Unit tests
-    ├── test_prime.py
-    ├── test_init.py
-    └── test_doctor.py
 
-checkpoints/
-├── active/                # Work in progress
-├── archive/               # Completed
-└── LEARNINGS.md           # Accumulated insights from archives
+# After `chkcc init` in your project:
+your-project/
+├── .claude/
+│   ├── settings.json      # Hooks installed here
+│   └── skills/coihuin-compress/  # Skill files copied here
+└── checkpoints/
+    ├── active/            # Work in progress
+    ├── archive/           # Completed
+    └── LEARNINGS.md       # Accumulated insights
 ```
 
 ## Background

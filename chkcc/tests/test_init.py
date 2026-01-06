@@ -42,24 +42,33 @@ def test_create_index_files(tmp_path):
     assert "Archived" in (base / "archive" / "INDEX.md").read_text()
 
 
-def test_install_hook_fresh(tmp_path):
-    """Init creates settings.json with hook."""
-    installed, msg = init.install_hook(tmp_path)
+def test_install_hooks_fresh(tmp_path):
+    """Init creates settings.json with hooks."""
+    results = init.install_hooks(tmp_path)
 
-    assert installed is True
+    # Both SessionStart and Stop hooks should be installed
+    assert len(results) == 2
+    assert results[0][0] is True  # SessionStart installed
+    assert results[1][0] is True  # Stop installed
+
     settings_path = tmp_path / ".claude" / "settings.json"
     assert settings_path.exists()
 
     settings = json.loads(settings_path.read_text())
     assert "SessionStart" in settings["hooks"]
+    assert "Stop" in settings["hooks"]
+
+    # Check matcher-based format for SessionStart
+    session_hooks = settings["hooks"]["SessionStart"]
     assert any(
-        "chkcc prime" in h.get("command", "")
-        for h in settings["hooks"]["SessionStart"]
+        hook.get("matcher") == "" and
+        any("chkcc prime" in h.get("command", "") for h in hook.get("hooks", []))
+        for hook in session_hooks
     )
 
 
-def test_install_hook_merges_existing(tmp_path):
-    """Init merges hook into existing settings."""
+def test_install_hooks_merges_existing(tmp_path):
+    """Init merges hooks into existing settings."""
     claude_dir = tmp_path / ".claude"
     claude_dir.mkdir()
     settings_path = claude_dir / "settings.json"
@@ -69,16 +78,16 @@ def test_install_hook_merges_existing(tmp_path):
         )
     )
 
-    installed, msg = init.install_hook(tmp_path)
+    results = init.install_hooks(tmp_path)
 
-    assert installed is True
+    assert results[0][0] is True  # SessionStart installed
     settings = json.loads(settings_path.read_text())
-    # Both hooks should exist
+    # Both old hook and new matcher-based hook should exist
     assert len(settings["hooks"]["SessionStart"]) == 2
 
 
-def test_install_hook_skips_duplicate(tmp_path):
-    """Init doesn't add duplicate hook."""
+def test_install_hooks_skips_duplicate(tmp_path):
+    """Init doesn't add duplicate hooks when matcher-based format already present."""
     claude_dir = tmp_path / ".claude"
     claude_dir.mkdir()
     settings_path = claude_dir / "settings.json"
@@ -87,14 +96,51 @@ def test_install_hook_skips_duplicate(tmp_path):
             {
                 "hooks": {
                     "SessionStart": [
-                        {"type": "command", "command": "chkcc prime 2>/dev/null || true"}
+                        {
+                            "matcher": "",
+                            "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]
+                        }
+                    ],
+                    "Stop": [
+                        {
+                            "matcher": "",
+                            "hooks": [{"type": "command", "command": "chkcc stop-hook"}]
+                        }
                     ]
                 }
             }
         )
     )
 
-    installed, msg = init.install_hook(tmp_path)
+    results = init.install_hooks(tmp_path)
 
-    assert installed is False
-    assert "already installed" in msg
+    assert results[0][0] is False  # SessionStart already installed
+    assert results[1][0] is False  # Stop already installed
+    assert "already installed" in results[0][1]
+    assert "already installed" in results[1][1]
+
+
+def test_install_hooks_detects_old_stop_format(tmp_path):
+    """Init detects old stop-checkpoint.py format and skips duplicate."""
+    claude_dir = tmp_path / ".claude"
+    claude_dir.mkdir()
+    settings_path = claude_dir / "settings.json"
+    settings_path.write_text(
+        json.dumps(
+            {
+                "hooks": {
+                    "Stop": [
+                        {"type": "command", "command": "python3 /path/to/stop-checkpoint.py"}
+                    ]
+                }
+            }
+        )
+    )
+
+    results = init.install_hooks(tmp_path)
+
+    # SessionStart should be installed (new)
+    assert results[0][0] is True
+    # Stop should be skipped (old format detected)
+    assert results[1][0] is False
+    assert "already installed" in results[1][1]

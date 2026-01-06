@@ -20,8 +20,14 @@ include = [
   "*.py",
 ]
 
+[tool.hatch.build.targets.wheel.force-include]
+"data" = "chkcc/data"
+
 [tool.hatch.build.targets.wheel.sources]
 "" = "chkcc"
+
+[tool.hatch.build]
+dev-mode-dirs = ["."]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
