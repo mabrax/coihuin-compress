@@ -81,10 +81,10 @@ def install_skill_files(project_root: Path) -> list[str]:
 
 def install_hooks(project_root: Path) -> list[tuple[bool, str]]:
     """
-    Install SessionStart and Stop hooks.
+    Install SessionStart hook.
 
     Returns:
-        List of (installed, message) tuples for each hook type.
+        List of (installed, message) tuples.
     """
     results = []
     claude_dir = project_root / ".claude"
@@ -127,36 +127,6 @@ def install_hooks(project_root: Path) -> list[tuple[bool, str]]:
         results.append((True, "SessionStart hook installed"))
     else:
         results.append((False, "SessionStart hook already installed"))
-
-    # Install Stop hook
-    if "Stop" not in settings["hooks"]:
-        settings["hooks"]["Stop"] = []
-
-    stop_hooks = settings["hooks"]["Stop"]
-    stop_installed = False
-
-    # Check if Stop hook already installed (new or old format)
-    for hook_entry in stop_hooks:
-        if isinstance(hook_entry, dict):
-            # New matcher-based format
-            if hook_entry.get("matcher") == "":
-                for h in hook_entry.get("hooks", []):
-                    if isinstance(h, dict) and "chkcc stop-hook" in h.get("command", ""):
-                        stop_installed = True
-                        break
-            # Old direct hook format (stop-checkpoint.py)
-            if "stop-checkpoint.py" in hook_entry.get("command", ""):
-                stop_installed = True
-
-    if not stop_installed:
-        # Add matcher-based Stop hook
-        stop_hooks.append({
-            "matcher": "",
-            "hooks": [{"type": "command", "command": "chkcc stop-hook"}]
-        })
-        results.append((True, "Stop hook installed"))
-    else:
-        results.append((False, "Stop hook already installed"))
 
     # Write back settings
     settings_path.write_text(json.dumps(settings, indent=2) + "\n")

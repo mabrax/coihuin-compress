@@ -1,7 +1,6 @@
 """Tests for chkcc init command."""
 
 import json
-import pytest
 from pathlib import Path
 
 from chkcc import init
@@ -46,17 +45,15 @@ def test_install_hooks_fresh(tmp_path):
     """Init creates settings.json with hooks."""
     results = init.install_hooks(tmp_path)
 
-    # Both SessionStart and Stop hooks should be installed
-    assert len(results) == 2
+    # SessionStart hook should be installed
+    assert len(results) == 1
     assert results[0][0] is True  # SessionStart installed
-    assert results[1][0] is True  # Stop installed
 
     settings_path = tmp_path / ".claude" / "settings.json"
     assert settings_path.exists()
 
     settings = json.loads(settings_path.read_text())
     assert "SessionStart" in settings["hooks"]
-    assert "Stop" in settings["hooks"]
 
     # Check matcher-based format for SessionStart
     session_hooks = settings["hooks"]["SessionStart"]
@@ -100,12 +97,6 @@ def test_install_hooks_skips_duplicate(tmp_path):
                             "matcher": "",
                             "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]
                         }
-                    ],
-                    "Stop": [
-                        {
-                            "matcher": "",
-                            "hooks": [{"type": "command", "command": "chkcc stop-hook"}]
-                        }
                     ]
                 }
             }
@@ -115,32 +106,4 @@ def test_install_hooks_skips_duplicate(tmp_path):
     results = init.install_hooks(tmp_path)
 
     assert results[0][0] is False  # SessionStart already installed
-    assert results[1][0] is False  # Stop already installed
     assert "already installed" in results[0][1]
-    assert "already installed" in results[1][1]
-
-
-def test_install_hooks_detects_old_stop_format(tmp_path):
-    """Init detects old stop-checkpoint.py format and skips duplicate."""
-    claude_dir = tmp_path / ".claude"
-    claude_dir.mkdir()
-    settings_path = claude_dir / "settings.json"
-    settings_path.write_text(
-        json.dumps(
-            {
-                "hooks": {
-                    "Stop": [
-                        {"type": "command", "command": "python3 /path/to/stop-checkpoint.py"}
-                    ]
-                }
-            }
-        )
-    )
-
-    results = init.install_hooks(tmp_path)
-
-    # SessionStart should be installed (new)
-    assert results[0][0] is True
-    # Stop should be skipped (old format detected)
-    assert results[1][0] is False
-    assert "already installed" in results[1][1]

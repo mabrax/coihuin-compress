@@ -85,10 +85,7 @@ def test_cmd_doctor_healthy(tmp_path, capsys):
                 "hooks": {
                     "SessionStart": [
                         {"matcher": "", "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]}
-                    ],
-                    "Stop": [
-                        {"matcher": "", "hooks": [{"type": "command", "command": "chkcc stop-hook"}]}
-                    ],
+                    ]
                 }
             }
         )
@@ -148,10 +145,8 @@ def test_cmd_doctor_fix_installs_hook(tmp_path, capsys):
     assert settings_path.exists()
     settings = json.loads(settings_path.read_text())
     assert "SessionStart" in settings["hooks"]
-    assert "Stop" in settings["hooks"]
     captured = capsys.readouterr()
     assert "Installed: SessionStart hook installed" in captured.out
-    assert "Installed: Stop hook installed" in captured.out
 
 
 def test_cmd_doctor_fix_then_healthy(tmp_path, capsys):

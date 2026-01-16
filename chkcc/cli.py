@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from chkcc import archive, current, doctor, init, scaffold, status, stop_hook, tree, update, validate
+from chkcc import archive, current, doctor, init, scaffold, status, tree, update, validate
 
 
 def cmd_tree(args: argparse.Namespace) -> int:
@@ -203,11 +203,6 @@ def cmd_update(args: argparse.Namespace) -> int:
     """Handle 'update' subcommand."""
     skill_dir = Path(args.project).expanduser().resolve() / ".claude" / "skills" / "coihuin-compress"
     return update.cmd_update(skill_dir, force=args.force, dry_run=args.dry_run)
-
-
-def cmd_stop_hook(_args: argparse.Namespace) -> int:
-    """Handle 'stop-hook' subcommand."""
-    return stop_hook.main()
 
 
 def main() -> None:
@@ -436,13 +431,6 @@ def main() -> None:
             help="Show what would change without writing",
         )
         update_parser.set_defaults(func=cmd_update)
-
-        # stop-hook command
-        stop_hook_parser = subparsers.add_parser(
-            "stop-hook",
-            help="Claude Code stop hook (reads JSON from stdin, outputs decision)",
-        )
-        stop_hook_parser.set_defaults(func=cmd_stop_hook)
 
         # Parse arguments
         args = parser.parse_args()

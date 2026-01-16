@@ -156,7 +156,6 @@ chkcc/                     # CLI package (canonical source)
 ├── init.py                # Project initialization
 ├── update.py              # Skill file sync
 ├── doctor.py              # Setup health check
-├── stop_hook.py           # Stop hook logic
 ├── tree.py                # Tree visualization
 ├── validate.py            # Format validation
 ├── scaffold.py            # Checkpoint/delta creation

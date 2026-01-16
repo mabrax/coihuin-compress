@@ -55,35 +55,6 @@ def check_hook(project_root: Path) -> tuple[bool, str]:
     return (False, "✗ SessionStart hook not found")
 
 
-def check_stop_hook(project_root: Path) -> tuple[bool, str]:
-    """Check if Stop hook is installed."""
-    settings_path = project_root / ".claude" / "settings.json"
-
-    if not settings_path.exists():
-        return (False, "✗ Stop hook not found")
-
-    try:
-        settings = json.loads(settings_path.read_text())
-    except json.JSONDecodeError:
-        return (False, "✗ Stop hook not found")
-
-    hooks = settings.get("hooks", {})
-    stop_hooks = hooks.get("Stop", [])
-
-    for hook in stop_hooks:
-        if isinstance(hook, dict):
-            # Check new matcher-based format
-            if hook.get("matcher") == "":
-                for h in hook.get("hooks", []):
-                    if isinstance(h, dict) and "chkcc stop-hook" in h.get("command", ""):
-                        return (True, "✓ Stop hook installed")
-            # Check old direct hook format (stop-checkpoint.py)
-            if "stop-checkpoint.py" in hook.get("command", ""):
-                return (True, "✓ Stop hook installed")
-
-    return (False, "✗ Stop hook not found")
-
-
 def check_skill_files(project_root: Path) -> list[tuple[bool, str]]:
     """
     Check skill file health by comparing installed vs package files.
@@ -129,7 +100,6 @@ def cmd_doctor(base_dir: Path, project_root: Path, fix: bool = False) -> int:
 
     # Hook checks
     checks.append(check_hook(project_root))
-    checks.append(check_stop_hook(project_root))
 
     all_passed = True
     for passed, msg in checks:
