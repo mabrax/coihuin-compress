@@ -1,17 +1,21 @@
-"""Stop hook: suggest checkpointing if meaningful work was done.
+"""Stop hook: spawn headless Claude to summarize session.
 
-This module implements a Claude Code stop hook that analyzes the session
-transcript to detect if code changes were made and reminds the user to
-checkpoint before ending the session.
+This module implements a Claude Code stop hook that spawns a headless
+Claude instance to run /summary on the session. Fire-and-forget approach:
+the hook approves immediately while the summary runs in background.
 
 The hook protocol:
-- Reads JSON from stdin with 'transcript_path' and optional 'stop_hook_active'
-- Outputs JSON with 'decision' ("block" or "approve") and 'reason'
+- Reads JSON from stdin with 'session_id', 'transcript_path', etc.
+- Outputs JSON with 'decision' ("approve") - never blocks
+- Spawns: claude -p "/summary" --resume <session_id> --allowedTools "Read,Write,Skill"
 """
 
 import json
 import os
+import subprocess
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def _debug_log(msg: str) -> None:
@@ -22,43 +26,91 @@ def _debug_log(msg: str) -> None:
             f.write(f"{msg}\n")
 
 
-def analyze_transcript(transcript_path: str) -> tuple[bool, bool]:
+def _find_project_root(transcript_path: str) -> Path | None:
     """
-    Analyze transcript for work and checkpoint status.
+    Find project root from transcript path.
 
-    Args:
-        transcript_path: Path to the Claude Code transcript file.
-
-    Returns:
-        Tuple of (has_work, already_checkpointed):
-        - has_work: True if Write/Edit/NotebookEdit was used on non-checkpoint files
-        - already_checkpointed: True if compress skill was invoked after last code change
+    Transcript paths look like: ~/.claude/projects/<hash>/transcript.jsonl
+    We need to find the actual project directory.
     """
-    last_code_change_idx = -1
-    last_checkpoint_idx = -1
+    # The transcript is in ~/.claude/projects/<hash>/
+    # The hash directory contains a .project file with the actual path
+    transcript = Path(transcript_path).expanduser()
+    if not transcript.exists():
+        return None
 
-    try:
-        with open(transcript_path) as f:
-            for idx, line in enumerate(f):
-                # Check for code changes (exclude checkpoint file operations)
-                if any(tool in line for tool in ['"Write"', '"Edit"', '"NotebookEdit"']):
-                    if "checkpoints/" not in line:
-                        last_code_change_idx = idx
+    project_meta = transcript.parent / ".project"
+    if project_meta.exists():
+        try:
+            # .project file contains the actual project path
+            project_path = project_meta.read_text().strip()
+            return Path(project_path)
+        except (OSError, IOError):
+            pass
 
-                # Check for compress skill invocation
-                if '"Skill"' in line and '"coihuin-compress"' in line:
-                    last_checkpoint_idx = idx
+    # Fallback: use current working directory
+    return Path.cwd()
 
-    except (OSError, IOError) as e:
-        _debug_log(f"Error reading transcript: {e}")
-        return False, False
 
-    has_work = last_code_change_idx >= 0
-    already_checkpointed = (
-        last_checkpoint_idx > last_code_change_idx and last_code_change_idx >= 0
+def _ensure_summaries_dir(project_root: Path) -> Path:
+    """Ensure checkpoints/summaries directory exists."""
+    summaries_dir = project_root / "checkpoints" / "summaries"
+    summaries_dir.mkdir(parents=True, exist_ok=True)
+    return summaries_dir
+
+
+def _update_state(summaries_dir: Path, session_id: str) -> None:
+    """Update state.json with new summary entry."""
+    state_file = summaries_dir / "state.json"
+
+    # Load existing state or create new
+    state = {"summaries": []}
+    if state_file.exists():
+        try:
+            state = json.loads(state_file.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Add new entry
+    entry = {
+        "session_id": session_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": "pending",
+    }
+    state["summaries"].append(entry)
+
+    # Write back
+    state_file.write_text(json.dumps(state, indent=2) + "\n")
+
+
+def _spawn_summary(session_id: str, project_root: Path) -> None:
+    """Spawn headless Claude to run /summary in background."""
+    summaries_dir = _ensure_summaries_dir(project_root)
+
+    # Update state before spawning
+    _update_state(summaries_dir, session_id)
+
+    # Output file for this summary
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    output_file = summaries_dir / f"summary-{timestamp}.md"
+
+    # Spawn headless Claude in background
+    # Use --resume with explicit session ID for deterministic behavior
+    cmd = (
+        f'claude -p "/summary" --resume "{session_id}" --allowedTools "Read,Write,Skill" '
+        f'> "{output_file}" 2>&1 &'
     )
 
-    return has_work, already_checkpointed
+    _debug_log(f"Spawning: {cmd}")
+
+    subprocess.Popen(
+        cmd,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,  # Detach from parent
+        cwd=str(project_root),
+    )
 
 
 def run_hook(input_data: dict) -> dict:
@@ -67,39 +119,47 @@ def run_hook(input_data: dict) -> dict:
 
     Args:
         input_data: Dictionary from Claude Code hook protocol containing
-                    'transcript_path' and optional 'stop_hook_active'.
+                    'session_id', 'transcript_path', etc.
 
     Returns:
-        Dictionary with 'decision' ("block" or "approve") and 'reason'.
+        Dictionary with 'decision' ("approve") - always approves.
     """
     _debug_log("=== Stop hook invoked ===")
-    _debug_log(f"Input data keys: {list(input_data.keys())}")
+    _debug_log(f"Input data: {json.dumps(input_data, indent=2)}")
 
-    # Prevent infinite loops
+    # Loop prevention: don't spawn if we're already in a stop hook
     if input_data.get("stop_hook_active"):
-        _debug_log("stop_hook_active=True, approving")
-        return {"decision": "approve", "reason": "Already in stop hook."}
+        _debug_log("Stop hook already active, skipping")
+        return {"decision": "approve", "reason": "Stop hook already active."}
 
+    session_id = input_data.get("session_id", "unknown")
     transcript_path = input_data.get("transcript_path", "")
-    _debug_log(f"transcript_path: {transcript_path}")
 
-    if not transcript_path:
-        _debug_log("No transcript path, approving")
-        return {"decision": "approve", "reason": "No transcript."}
+    # Find project root
+    project_root = None
+    if transcript_path:
+        project_root = _find_project_root(transcript_path)
 
-    has_work, already_checkpointed = analyze_transcript(transcript_path)
-    _debug_log(f"has_work={has_work}, already_checkpointed={already_checkpointed}")
+    if project_root is None:
+        project_root = Path.cwd()
 
-    if has_work and not already_checkpointed:
-        _debug_log("Work detected, not yet checkpointed, blocking")
-        return {
-            "decision": "block",
-            "reason": "Use compress skill to checkpoint before ending.",
-        }
+    _debug_log(f"Project root: {project_root}")
 
-    reason = "Already checkpointed." if already_checkpointed else "No checkpoint needed."
-    _debug_log(f"Approving: {reason}")
-    return {"decision": "approve", "reason": reason}
+    # Check if checkpoints directory exists (coihuin-compress is set up)
+    checkpoints_dir = project_root / "checkpoints"
+    if not checkpoints_dir.exists():
+        _debug_log("No checkpoints directory, skipping summary")
+        return {"decision": "approve", "reason": "No checkpoints directory."}
+
+    # Spawn summary in background
+    try:
+        _spawn_summary(session_id, project_root)
+        _debug_log("Summary spawned successfully")
+    except Exception as e:
+        _debug_log(f"Failed to spawn summary: {e}")
+
+    # Always approve - fire and forget
+    return {"decision": "approve", "reason": "Summary spawned."}
 
 
 def main() -> int:
@@ -109,7 +169,7 @@ def main() -> int:
     except json.JSONDecodeError as e:
         _debug_log(f"Invalid JSON input: {e}")
         print(json.dumps({"decision": "approve", "reason": "Invalid input."}))
-        return 1
+        return 0
 
     result = run_hook(input_data)
     print(json.dumps(result))
