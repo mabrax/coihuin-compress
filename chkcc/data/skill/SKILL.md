@@ -1,6 +1,6 @@
 ---
 name: coihuin-compress
-description: Context compression for long coding sessions. Creates checkpoints (state snapshots) and maintains them as you work.
+description: Context compression for long coding sessions. Creates checkpoints (state snapshots) and maintains them as you work. Invoke at session start to auto-load the current checkpoint.
 ---
 
 # Coihuin Compress
@@ -10,15 +10,16 @@ Context compression at natural breakpoints, not reactive to token limits.
 ## Workflow
 
 ```
-Session 1 (new work):
-  → "checkpoint" → creates new checkpoint
-  → chkcc current <checkpoint> → set as current
+Session Start (invoke skill):
+  → /coihuin-compress
+  → Auto-detect: run `chkcc current`
+  → If current exists: read checkpoint file, resume work
+  → If no current: offer to create or set one
 
-Session 2+ (continuing):
-  → Read checkpoint file
-  → chkcc current <checkpoint> → set as current
-  → work + continuous maintenance
-  → "archive" when done
+During Session:
+  → Continuous maintenance (update checkpoint as you work)
+  → "delta" for explicit progress markers
+  → "archive" when work complete
 ```
 
 ## Continuous Maintenance
@@ -51,6 +52,23 @@ chkcc status                # Show all active with summaries
 ```
 
 ## Operations
+
+### Session Start
+
+Auto-detect and load current checkpoint when skill is invoked.
+
+**Trigger**: `/coihuin-compress` at session start (no arguments)
+
+**How**:
+1. Run `chkcc current` to check for existing current checkpoint
+2. If current checkpoint exists:
+   - Read the checkpoint file
+   - Acknowledge loaded context to user
+   - Ready to continue work with continuous maintenance
+3. If no current checkpoint:
+   - Check `checkpoints/active/INDEX.md` for available checkpoints
+   - If checkpoints exist: ask user which to set as current
+   - If no checkpoints: offer to create a new one
 
 ### Checkpoint
 
