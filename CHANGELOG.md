@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Auto-commit integration** - Checkpoint operations now trigger automatic commits
+  - Security scan for sensitive files before committing
+  - Auto-split changes into atomic commits (use judgment, minimize interruption)
+  - Checkpoint folder always staged and committed
+  - Commit messages derived from checkpoint context (problem, intent, decisions)
+  - Only asks human when genuinely ambiguous or security concern detected
 
 ## [1.8.0] - 2026-01-06
 
