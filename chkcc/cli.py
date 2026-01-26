@@ -175,11 +175,6 @@ def cmd_prime(args: argparse.Namespace) -> int:
         return 0  # Silent exit, no error
 
     content = checkpoint.path.read_text(encoding='utf-8')
-
-    if args.header:
-        print(f"# Context Recovery: {checkpoint.id}")
-        print()
-
     print(content, end='')  # Avoid extra newline if content already ends with one
     return 0
 
@@ -357,17 +352,12 @@ def main() -> None:
         # prime command
         prime_parser = subparsers.add_parser(
             "prime",
-            help="Output current checkpoint content to stdout",
+            help="Dump current checkpoint content to stdout",
         )
         prime_parser.add_argument(
             "--dir",
             default="./checkpoints",
             help="Checkpoints directory (default: ./checkpoints)",
-        )
-        prime_parser.add_argument(
-            "--header",
-            action="store_true",
-            help="Prepend '# Context Recovery: {checkpoint-name}' header",
         )
         prime_parser.set_defaults(func=cmd_prime)
 
