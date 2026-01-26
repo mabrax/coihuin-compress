@@ -3,6 +3,4 @@
 | Checkpoint | Description | Last Updated |
 |------------|-------------|--------------|
 
----
-
-*No active checkpoints.*
+No active checkpoints.

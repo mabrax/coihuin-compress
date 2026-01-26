@@ -6,7 +6,76 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Auto-commit integration** - Checkpoint operations now trigger automatic commits
+  - Security scan for sensitive files before committing
+  - Auto-split changes into atomic commits (use judgment, minimize interruption)
+  - Checkpoint folder always staged and committed
+  - Commit messages derived from checkpoint context (problem, intent, decisions)
+  - Only asks human when genuinely ambiguous or security concern detected
+
+### Changed
+
+- **`chkcc prime` simplified** - Removed `--header` option, now pure content dump
+  - Command outputs checkpoint content directly with no transformations
+  - Simpler and more predictable for piping
+
+## [1.8.0] - 2026-01-06
+
+### Added
+
+- **`chkcc update` command** - Sync skill files from package to project
+  - Checksum-based comparison detects local modifications
+  - `--force` flag overwrites locally modified files
+  - `--dry-run` flag shows what would change without writing
+  - Requires `chkcc init` first (validates setup)
+
+- **`chkcc stop-hook` command** - Portable Stop hook for Claude Code
+  - Reads JSON from stdin, outputs decision to stdout
+  - Detects meaningful work (Write/Edit/NotebookEdit) in transcript
+  - Excludes checkpoint file operations from "work" detection
+  - Blocks session end with reminder to checkpoint if work detected
+  - No more hardcoded script paths in hook configuration
+
+- **Skill file packaging** - Canonical source moved to CLI package
+  - Skill files now live in `chkcc/data/skill/` (package owns them)
+  - `chkcc init` installs skill files to project `.claude/skills/`
+  - `chkcc update` syncs changes after package updates
+  - `chkcc doctor` validates skill files match package
+
+- **Stop hook in `chkcc init`** - Full hook setup
+  - Installs both SessionStart and Stop hooks
+  - Uses new matcher-based hook format
+  - Detects existing hooks (old and new formats) to avoid duplicates
+
+- **Enhanced `chkcc doctor`** - Comprehensive health checks
+  - Validates Stop hook installation
+  - Validates skill files match package (with checksum)
+  - Reports missing/modified skill files
+  - `--fix` repairs skill files and hooks
+
+### Changed
+
+- **Skill files removed from repo** - No longer in `.claude/skills/`
+  - Canonical source is now `chkcc/data/skill/`
+  - Projects get skill files via `chkcc init` or `chkcc update`
+  - Eliminates sync issues between repo and installed versions
+
+- **Hook format** - Now uses matcher-based structure
+  - Old: `{"type": "command", "command": "..."}`
+  - New: `{"matcher": "", "hooks": [{"type": "command", "command": "..."}]}`
+  - Both formats detected for backward compatibility
+
+### Rationale
+
+The skill files lived in two places: the repo (`.claude/skills/`) and projects where they were copied. Updates required manual copying, and versions drifted. The solution: make the CLI package the single source of truth.
+
+`chkcc init` now does complete setup: directories, INDEX files, skill files, AND hooks (both SessionStart and Stop). `chkcc update` syncs skill files after package updates—like `apt upgrade` for your skill.
+
+The Stop hook solves context loss: users forget to checkpoint before ending sessions. Now Claude gets a reminder when meaningful work was done. The hook is portable (`chkcc stop-hook`) instead of a hardcoded script path, so it works across machines and after reinstalls.
+
+Doctor got smarter: it validates the full setup including skill files and Stop hook. One command to know if everything's configured correctly.
 
 ## [1.7.0] - 2026-01-03
 

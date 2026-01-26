@@ -1,7 +1,6 @@
 """Tests for chkcc init command."""
 
 import json
-import pytest
 from pathlib import Path
 
 from chkcc import init
@@ -42,24 +41,31 @@ def test_create_index_files(tmp_path):
     assert "Archived" in (base / "archive" / "INDEX.md").read_text()
 
 
-def test_install_hook_fresh(tmp_path):
-    """Init creates settings.json with hook."""
-    installed, msg = init.install_hook(tmp_path)
+def test_install_hooks_fresh(tmp_path):
+    """Init creates settings.json with hooks."""
+    results = init.install_hooks(tmp_path)
 
-    assert installed is True
+    # SessionStart hook should be installed
+    assert len(results) == 1
+    assert results[0][0] is True  # SessionStart installed
+
     settings_path = tmp_path / ".claude" / "settings.json"
     assert settings_path.exists()
 
     settings = json.loads(settings_path.read_text())
     assert "SessionStart" in settings["hooks"]
+
+    # Check matcher-based format for SessionStart
+    session_hooks = settings["hooks"]["SessionStart"]
     assert any(
-        "chkcc prime" in h.get("command", "")
-        for h in settings["hooks"]["SessionStart"]
+        hook.get("matcher") == "" and
+        any("chkcc prime" in h.get("command", "") for h in hook.get("hooks", []))
+        for hook in session_hooks
     )
 
 
-def test_install_hook_merges_existing(tmp_path):
-    """Init merges hook into existing settings."""
+def test_install_hooks_merges_existing(tmp_path):
+    """Init merges hooks into existing settings."""
     claude_dir = tmp_path / ".claude"
     claude_dir.mkdir()
     settings_path = claude_dir / "settings.json"
@@ -69,16 +75,16 @@ def test_install_hook_merges_existing(tmp_path):
         )
     )
 
-    installed, msg = init.install_hook(tmp_path)
+    results = init.install_hooks(tmp_path)
 
-    assert installed is True
+    assert results[0][0] is True  # SessionStart installed
     settings = json.loads(settings_path.read_text())
-    # Both hooks should exist
+    # Both old hook and new matcher-based hook should exist
     assert len(settings["hooks"]["SessionStart"]) == 2
 
 
-def test_install_hook_skips_duplicate(tmp_path):
-    """Init doesn't add duplicate hook."""
+def test_install_hooks_skips_duplicate(tmp_path):
+    """Init doesn't add duplicate hooks when matcher-based format already present."""
     claude_dir = tmp_path / ".claude"
     claude_dir.mkdir()
     settings_path = claude_dir / "settings.json"
@@ -87,14 +93,17 @@ def test_install_hook_skips_duplicate(tmp_path):
             {
                 "hooks": {
                     "SessionStart": [
-                        {"type": "command", "command": "chkcc prime 2>/dev/null || true"}
+                        {
+                            "matcher": "",
+                            "hooks": [{"type": "command", "command": "chkcc prime 2>/dev/null || true"}]
+                        }
                     ]
                 }
             }
         )
     )
 
-    installed, msg = init.install_hook(tmp_path)
+    results = init.install_hooks(tmp_path)
 
-    assert installed is False
-    assert "already installed" in msg
+    assert results[0][0] is False  # SessionStart already installed
+    assert "already installed" in results[0][1]

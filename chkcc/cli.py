@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from chkcc import archive, current, doctor, init, scaffold, status, tree, validate
+from chkcc import archive, current, doctor, init, scaffold, status, tree, update, validate
 
 
 def cmd_tree(args: argparse.Namespace) -> int:
@@ -175,11 +175,6 @@ def cmd_prime(args: argparse.Namespace) -> int:
         return 0  # Silent exit, no error
 
     content = checkpoint.path.read_text(encoding='utf-8')
-
-    if args.header:
-        print(f"# Context Recovery: {checkpoint.id}")
-        print()
-
     print(content, end='')  # Avoid extra newline if content already ends with one
     return 0
 
@@ -197,6 +192,12 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     base_dir = Path(args.dir).expanduser().resolve()
     project_root = Path(args.project).expanduser().resolve()
     return doctor.cmd_doctor(base_dir, project_root, fix=args.fix)
+
+
+def cmd_update(args: argparse.Namespace) -> int:
+    """Handle 'update' subcommand."""
+    skill_dir = Path(args.project).expanduser().resolve() / ".claude" / "skills" / "coihuin-compress"
+    return update.cmd_update(skill_dir, force=args.force, dry_run=args.dry_run)
 
 
 def main() -> None:
@@ -351,17 +352,12 @@ def main() -> None:
         # prime command
         prime_parser = subparsers.add_parser(
             "prime",
-            help="Output current checkpoint content to stdout",
+            help="Dump current checkpoint content to stdout",
         )
         prime_parser.add_argument(
             "--dir",
             default="./checkpoints",
             help="Checkpoints directory (default: ./checkpoints)",
-        )
-        prime_parser.add_argument(
-            "--header",
-            action="store_true",
-            help="Prepend '# Context Recovery: {checkpoint-name}' header",
         )
         prime_parser.set_defaults(func=cmd_prime)
 
@@ -403,6 +399,28 @@ def main() -> None:
             help="Automatically fix any issues found",
         )
         doctor_parser.set_defaults(func=cmd_doctor)
+
+        # update command
+        update_parser = subparsers.add_parser(
+            "update",
+            help="Update skill files from package",
+        )
+        update_parser.add_argument(
+            "--project",
+            default=".",
+            help="Project root directory (default: current directory)",
+        )
+        update_parser.add_argument(
+            "-f", "--force",
+            action="store_true",
+            help="Overwrite locally modified files",
+        )
+        update_parser.add_argument(
+            "-n", "--dry-run",
+            action="store_true",
+            help="Show what would change without writing",
+        )
+        update_parser.set_defaults(func=cmd_update)
 
         # Parse arguments
         args = parser.parse_args()
