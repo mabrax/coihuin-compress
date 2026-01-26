@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Commit messages derived from checkpoint context (problem, intent, decisions)
   - Only asks human when genuinely ambiguous or security concern detected
 
+### Changed
+
+- **`chkcc prime` simplified** - Removed `--header` option, now pure content dump
+  - Command outputs checkpoint content directly with no transformations
+  - Simpler and more predictable for piping
+
 ## [1.8.0] - 2026-01-06
 
 ### Added
